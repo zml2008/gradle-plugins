@@ -22,20 +22,11 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.SourceSetContainer
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetContainer
 
 open class GenerateTemplateTask : Copy() {
     @Internal
     var hasProperties = false
-
-    init {
-        doFirst {
-            if (!hasProperties) {
-                properties("project" to project)
-            }
-        }
-    }
 
     fun includeRoot(vararg sourceRoots: Any) {
         from(sourceRoots) {
@@ -57,12 +48,11 @@ open class GenerateTemplateTask : Copy() {
 class TemplatingPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            extensions.configure(SourceSetContainer::class.java) { sets ->
-                sets.forEach { src ->
+            extensions.getByType(SourceSetContainer::class.java).configureEach { src ->
                     val taskName = src.getTaskName("generate", "Templates")
                     val task = tasks.register(taskName, GenerateTemplateTask::class.java) {
-                        it.includeRoot(rootDir.resolve("src/${src.name}/templates"))
-                        it.into("$buildDir/generated-src/templates/${it.name}")
+                        it.includeRoot(file("src/${src.name}/templates"))
+                        it.into("$buildDir/generated-src/templates/${src.name}")
                     }
 
                     if (plugins.hasPlugin("kotlin")) { // we are using kotlin
@@ -75,9 +65,17 @@ class TemplatingPlugin : Plugin<Project> {
                         }
 
                     } else if (plugins.hasPlugin(JavaPlugin::class.java)) {
+                        src.java.srcDir(task.map { it.outputs })
                         tasks.named(src.compileJavaTaskName) { t ->
                             t.dependsOn(task)
                         }
+                    }
+                }
+
+            afterEvaluate {
+                tasks.withType(GenerateTemplateTask::class.java).configureEach {
+                    if (!it.hasProperties) {
+                        it.properties("project" to project)
                     }
                 }
             }
