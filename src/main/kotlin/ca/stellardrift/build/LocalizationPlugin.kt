@@ -161,7 +161,7 @@ class LocalizationPlugin : Plugin<Project> {
                             it.dependsOn(task)
                         }
                     }
-                    TemplateType.OTHER -> {
+                    else -> {
                         // no-op
                     }
                 }

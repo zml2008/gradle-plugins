@@ -51,8 +51,9 @@ class TemplatingPlugin : Plugin<Project> {
             extensions.getByType(SourceSetContainer::class.java).configureEach { src ->
                     val taskName = src.getTaskName("generate", "Templates")
                     val task = tasks.register(taskName, GenerateTemplateTask::class.java) {
+                        val output = project.layout.buildDirectory.dir("generated-src/${src.name}/templates")
                         it.includeRoot(file("src/${src.name}/templates"))
-                        it.into("$buildDir/generated-src/templates/${src.name}")
+                        it.into(output)
                     }
 
                     if (plugins.hasPlugin("kotlin")) { // we are using kotlin
