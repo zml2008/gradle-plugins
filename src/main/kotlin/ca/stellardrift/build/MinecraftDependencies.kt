@@ -29,7 +29,7 @@ fun RepositoryHandler.sponge() = maven {
 
 fun RepositoryHandler.sk89q() = maven {
     it.name = "s89q"
-    it.url = URI("https://mvn.sk89q.com/repo/")
+    it.url = URI("https://maven.sk89q.com/repo/")
 }
 
 fun RepositoryHandler.jitpack() = maven {
