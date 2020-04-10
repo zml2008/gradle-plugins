@@ -35,17 +35,24 @@ import org.gradle.api.provider.Property
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
+import org.gradle.plugins.signing.Sign
+import org.gradle.plugins.signing.SigningExtension
+import org.gradle.plugins.signing.SigningPlugin
 import java.io.Serializable
 import java.net.URL
 import java.time.format.DateTimeFormatter
 
 private val UTF_8 = "UTF-8"
 private val PUBLICATION_ID = "maven"
+private val VERSION_JUNIT_PROPERTY = "version.junit"
+private val VERSION_JUNIT_DEFAULT = "5.6.0"
 internal val sourceFiles = listOf("**/*.java", "**/*.kt", "**/*.groovy", "**/*.scala")
 
 /**
@@ -106,6 +113,17 @@ open class OpinionatedExtension(objects: ObjectFactory) {
     var javaVersion: JavaVersion = JavaVersion.VERSION_1_8
 
     /**
+     * Create an automatic module name using the format `<group>.<name>`,
+     * where name has all dashes replaced with dots.
+     */
+    var automaticModuleNames = false
+
+    /**
+     * Set up JUnit Jupiter task configurations and dependencies
+     */
+    internal var usesJUnit5 = false
+
+    /**
      * The primary publication for this project
      */
     lateinit var publication: MavenPublication internal set
@@ -146,6 +164,13 @@ open class OpinionatedExtension(objects: ObjectFactory) {
     fun gitlab(userName: String, repo: String) {
         scm.set(GitlabOptions(userName, repo))
     }
+
+    /**
+     * Enable JUnit 5 setup
+     */
+    fun useJUnit5() {
+        this.usesJUnit5 = true
+    }
 }
 
 class OpinionatedDefaultsPlugin : Plugin<Project> {
@@ -159,6 +184,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 apply(GrgitPlugin::class.java)
                 apply(BintrayPlugin::class.java)
                 apply(MavenPublishPlugin::class.java)
+                apply(SigningPlugin::class.java)
             }
 
             val grgit = project.extensions.getByType(Grgit::class.java)
@@ -191,15 +217,24 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             }
 
             val requireClean = project.tasks.register("requireClean", RequireClean::class.java)
-            extensions.getByType(PublishingExtension::class.java).run {
+            val publications = extensions.getByType(PublishingExtension::class.java).run {
                 publications.register(PUBLICATION_ID, MavenPublication::class.java) {
                     configureMavenPublication(this@with, extension, it)
                 }
+                publications
             }
 
-            val tagRef = grgit.repository.jgit.tagList().call().firstOrNull()
-            val tag: Tag? = grgit.resolve.toTag(tagRef?.name)
-            val headCommit = grgit.head()
+            extensions.getByType(SigningExtension::class.java).apply {
+                useGpgCmd()
+                sign(publications)
+            }
+
+            tasks.withType(Sign::class.java).configureEach {
+                it.onlyIf {
+                    hasProperty("forceSign") || isRelease()
+                }
+            }
+
 
             val bintrayExtension = extensions.getByType(BintrayExtension::class.java).apply {
                 user = findProperty("bintrayUser") as String? ?: System.getenv("BINTRAY_USER")
@@ -210,6 +245,8 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                     name = project.name
                     vcsUrl = extension.scm.orNull?.connection
                     version.apply {
+                        val tagRef = grgit.repository.jgit.tagList().call().firstOrNull()
+                        val tag: Tag? = grgit.resolve.toTag(tagRef?.name)
                         name = project.version as String
                         vcsTag = tag?.name
                         desc = tag?.fullMessage
@@ -222,8 +259,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             tasks.named("bintrayUpload").configure {
                 it.dependsOn(requireClean)
                 it.onlyIf {
-                    tag?.commit?.id.equals(headCommit?.id) &&
-                            !(version as String).contains("SNAPSHOT")
+                    isRelease()
                 }
             }
 
@@ -237,6 +273,8 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 tasks.withType(JavaCompile::class.java).configureEach {
                     it.options.apply {
                         encoding = UTF_8
+                        compilerArgs.addAll(listOf("-Xlint:all", "-Xlint:-serial", "-Xlint:-processing",
+                            "-Xdoclint", "-Xdoclint:-missing"))
                     }
                 }
 
@@ -256,6 +294,32 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                     vcsUrl = extension.scm.orNull?.connection
                     extension.license.orNull?.apply {
                         setLicenses(shortName)
+                    }
+                }
+
+                if (extension.automaticModuleNames) {
+                    tasks.named("jar", Jar::class.java).configure {
+                        it.manifest.attributes(mapOf("Automatic-Module-Name" to "$group.${name.replace("-", ".")}"))
+                    }
+                }
+
+                if (extension.usesJUnit5) {
+                    tasks.withType(Test::class.java).configureEach {
+                        it.useJUnitPlatform()
+                    }
+
+                    extensions.getByType(SourceSetContainer::class.java).named("test").configure {
+                        dependencies.apply {
+                            val junitVersion = findProperty(VERSION_JUNIT_PROPERTY) ?: VERSION_JUNIT_DEFAULT
+                            add(
+                                it.runtimeElementsConfigurationName,
+                                "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+                            )
+                            add(
+                                it.runtimeOnlyConfigurationName,
+                                "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+                            )
+                        }
                     }
                 }
 
@@ -321,4 +385,14 @@ fun DependencyHandler.apAnd(scope: String, spec: String, configure: Dependency.(
 fun <T : Dependency> DependencyHandler.apAnd(scope: String, spec: T, configure: T.() -> Unit = {}) = run {
     add("annotationProcessor", spec)?.apply { configure(this as T) }
     add(scope, spec)?.apply { configure(this as T) }
+}
+
+fun Project.isRelease(): Boolean {
+    val grgit = extensions.getByType(Grgit::class.java)
+    val tagRef = grgit.repository.jgit.tagList().call().firstOrNull()
+    val tag: Tag? = grgit.resolve.toTag(tagRef?.name)
+    val headCommit = grgit.head()
+
+    return tag?.commit?.id.equals(headCommit?.id) &&
+            !(version as String).contains("SNAPSHOT")
 }

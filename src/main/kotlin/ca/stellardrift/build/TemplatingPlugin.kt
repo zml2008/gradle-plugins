@@ -65,7 +65,7 @@ class TemplatingPlugin : Plugin<Project> {
                         it.into("$buildDir/generated-src/templates/${it.name}")
                     }
 
-                    if (plugins.hasPlugin(KotlinPlatformJvmPlugin::class.java)) { // we are using kotlin
+                    if (plugins.hasPlugin("kotlin")) { // we are using kotlin
                         extensions.getByType(KotlinSourceSetContainer::class.java).sourceSets.getByName(src.name)
                             .apply {
                                 kotlin.srcDir(task.map { it.outputs })
