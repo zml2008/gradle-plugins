@@ -312,7 +312,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                         dependencies.apply {
                             val junitVersion = findProperty(VERSION_JUNIT_PROPERTY) ?: VERSION_JUNIT_DEFAULT
                             add(
-                                it.runtimeElementsConfigurationName,
+                                it.implementationConfigurationName,
                                 "org.junit.jupiter:junit-jupiter-api:$junitVersion"
                             )
                             add(
