@@ -22,6 +22,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
@@ -35,15 +37,15 @@ import java.io.FileWriter
 import java.util.Locale
 import java.util.Properties
 
-val MESSAGES_ROOT_NAME = "messages"
+const val MESSAGES_ROOT_NAME = "messages"
 
-enum class TemplateType {
-    JAVA, KOTLIN, OTHER
+enum class TemplateType(val extension: String) {
+    JAVA("java"), KOTLIN("kt"), OTHER("fixme")
 }
 
 open class LocalizationExtension(objects: ObjectFactory) {
-    var templateFile: RegularFileProperty = objects.fileProperty()
-    val templateType: TemplateType = TemplateType.KOTLIN
+    val templateFile: RegularFileProperty = objects.fileProperty()
+    val templateType: Property<TemplateType> = objects.property(TemplateType::class.java).convention(TemplateType.KOTLIN)
 }
 
 open class LocalizationGenerate : DefaultTask() {
@@ -59,6 +61,9 @@ open class LocalizationGenerate : DefaultTask() {
 
     @InputFile
     val templateFile = project.objects.fileProperty()
+
+    @Input
+    val templateType = project.objects.property(TemplateType::class.java)
 
     @OutputDirectory
     val generatedSourcesOut = project.objects.directoryProperty()
@@ -79,7 +84,7 @@ open class LocalizationGenerate : DefaultTask() {
 
             val packageName = path.parent.segments.joinToString(".").toLowerCase(Locale.ROOT)
             val className = path.lastName.split('.', limit = 2).first().capitalize()
-            val destinationPath = path.replaceLastName("$className.kt").getFile(generatedSourcesOut.asFile.get())
+            val destinationPath = path.replaceLastName("$className.${templateType.get().extension}").getFile(generatedSourcesOut.asFile.get())
 
             val propertiesFile = Properties()
             FileReader(it.file).use { read ->
@@ -115,49 +120,54 @@ class LocalizationPlugin : Plugin<Project> {
         val extension = project.extensions.create("localization", LocalizationExtension::class.java)
         val parentTask = project.tasks.register("generateAllLocalizations")
 
-        project.extensions.configure(SourceSetContainer::class.java) { sourceSets ->
-            sourceSets.forEach {
-                val messagesFileBasedir = project.file("src/${it.name}/$MESSAGES_ROOT_NAME")
-                val outDir = project.layout.buildDirectory.dir("generated-src/${it.name}/$MESSAGES_ROOT_NAME")
-                val task = project.tasks.register(
-                    it.getTaskName("generate", "Localization"),
-                    LocalizationGenerate::class.java
-                ) { loc ->
-                    loc.resourceBundleSources.set(messagesFileBasedir)
-                    loc.templateFile.set(extension.templateFile)
-                    loc.generatedSourcesOut.set(outDir)
-                }
-                parentTask.configure { t ->
-                    t.dependsOn(task)
-                }
+        val sSets = project.extensions.getByType(SourceSetContainer::class.java)
+        sSets.configureEach {
+            val messagesFileBasedir = project.file("src/${it.name}/$MESSAGES_ROOT_NAME")
+            val outDir = project.layout.buildDirectory.dir("generated-src/${it.name}/$MESSAGES_ROOT_NAME")
+            val task = project.tasks.register(
+                it.getTaskName("generate", "Localization"),
+                LocalizationGenerate::class.java
+            ) { loc ->
+                loc.resourceBundleSources.set(messagesFileBasedir)
+                loc.templateFile.set(extension.templateFile)
+                loc.generatedSourcesOut.set(outDir)
+                loc.templateType.set(extension.templateType)
+            }
+            parentTask.configure { t ->
+                t.dependsOn(task)
+            }
 
-                it.resources.srcDir(messagesFileBasedir)
+            it.resources.srcDir(messagesFileBasedir)
+        }
+        project.afterEvaluate { _ ->
+            sSets.configureEach {
+                val task = project.tasks.named(
+                    it.getTaskName("generate", "Localization"), LocalizationGenerate::class.java
+                )
 
-                project.afterEvaluate { _ ->
-                    when (extension.templateType) {
-                        TemplateType.KOTLIN -> {
-                            project.extensions.getByType(KotlinSourceSetContainer::class.java).sourceSets.getByName(it.name)
-                                .apply {
-                                    kotlin.srcDir(task.map { t -> t.generatedSourcesOut })
-                                    project.tasks.named(it.getTaskName("compile", "Kotlin")) {
-                                        it.dependsOn(task)
-                                    }
+                when (extension.templateType.get()) {
+                    TemplateType.KOTLIN -> {
+                        project.extensions.findByType(KotlinSourceSetContainer::class.java)?.sourceSets?.named(it.name)
+                            ?.configure { set ->
+                                set.kotlin.srcDir(task.map { t -> t.generatedSourcesOut })
+                                project.tasks.named(it.getCompileTaskName("Kotlin")) {
+                                    it.dependsOn(task)
                                 }
-                        }
-                        TemplateType.JAVA -> {
-                            it.java.srcDir(task.map { t -> t.generatedSourcesOut })
-                            project.tasks.named(it.compileJavaTaskName) {
-                                it.dependsOn(task)
                             }
-                        }
-                        TemplateType.OTHER -> {
-                            // no-op
+                    }
+                    TemplateType.JAVA -> {
+                        it.java.srcDir(task.map { t -> t.generatedSourcesOut })
+                        project.tasks.named(it.compileJavaTaskName) {
+                            it.dependsOn(task)
                         }
                     }
+                    TemplateType.OTHER -> {
+                        // no-op
+                    }
                 }
-
                 it.resources.srcDir(task.map { t -> t.resourceBundleSources })
             }
+
         }
     }
 }
