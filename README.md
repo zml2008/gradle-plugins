@@ -63,7 +63,21 @@ Applies a few settings specific to Kotlin JVM projects, and brings in standard o
 
 ## Localization (`ca.stellardrift.localization`)
 
-Using a single template, generate source files to more reliably access strings contained in resources bundles in the `src/<set>/messages` root. Currently supports automatically configuring compile tasks for Java and Kotlin.
+Using a single template, generate source files to more reliably access strings contained in resources bundles in the `src/<set>/messages` root. Currently supports automatically configuring compile tasks for Java and Kotlin. A messages class template in GString format must be provided. This template will get the following parameters:
+
+Variable | Purpose
+-------- | -------
+`bundleName` | name of resource bundle for file
+`packageName` | file package
+`className` | Name of file capitalized for use as a class name
+`keys` | The resource bundle keys
+
+This plugin adds a `localization` extension to the project with the following properties:
+
+Property | Type | Use
+-------- | ----- | ------
+`templateFile` | File property | The location of the template file to use
+`templateType` | TemplateType | The language the template is written in
 
 ## Templating (`ca.stellardrift.templating`)
 
