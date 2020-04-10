@@ -93,7 +93,11 @@ data class GitlabOptions(
 }
 
 /**
- * Represents a license that can be applied to software
+ * Represents a license that can be applied to software.
+ *
+ * The [shortName] parameter must be one of the license names supported by
+ * [Bintray's](https://www.jfrog.com/confluence/display/BT/Bintray+REST+API#BintrayRESTAPI-DeleteDockerTag)
+ * REST API
  */
 data class License(val name: String, val shortName: String, val url: URL) : Serializable
 
@@ -101,9 +105,9 @@ fun apache2() =
     License("The Apache License, Version 2.0", "Apache-2.0", URL("http://www.apache.org/licenses/LICENSE-2.0"))
 
 fun mit() = License("The MIT License", "MIT", URL("https://opensource.org/licenses/MIT"))
-fun gpl3() = License("GNU General Public License, Version 3", "GPL3", URL("https://www.gnu.org/licenses/gpl-3.0.html"))
+fun gpl3() = License("GNU General Public License, Version 3", "GPL-3.0", URL("https://www.gnu.org/licenses/gpl-3.0.html"))
 fun agpl3() =
-    License("GNU Affero General Public License, Version 3", "AGPL3", URL("https://www.gnu.org/licenses/agpl-3.0.html"))
+    License("GNU Affero General Public License, Version 3", "AGPL-V3", URL("https://www.gnu.org/licenses/agpl-3.0.html"))
 
 
 open class OpinionatedExtension(objects: ObjectFactory) {
