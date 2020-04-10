@@ -28,9 +28,14 @@ open class GenerateTemplateTask : Copy() {
     @Internal
     var hasProperties = false
 
+    init {
+        group = CATEGORY_GENERATION
+        description = "Generate source templates"
+    }
+
     fun includeRoot(vararg sourceRoots: Any) {
         from(sourceRoots) {
-            it.include(sourceFiles)
+            it.include(SOURCE_FILES)
         }
     }
 

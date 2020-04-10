@@ -58,7 +58,6 @@ open class LocalizationGenerate : DefaultTask() {
     @Internal
     val tree = project.objects.fileTree().from(resourceBundleSources)
 
-
     @InputFile
     val templateFile = project.objects.fileProperty()
 
@@ -70,7 +69,9 @@ open class LocalizationGenerate : DefaultTask() {
 
     init {
         tree.include("**/*.properties")
-        tree.exclude { it2 -> it2.name.contains('_') }
+        tree.exclude { it2 -> it2.name.contains('_') } // Don't include already translated files
+        group = CATEGORY_GENERATION
+        description = "Generate source files for resource bundle constants, based on a template and a resource bundle root"
     }
 
     @TaskAction

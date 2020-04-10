@@ -49,11 +49,7 @@ import java.io.Serializable
 import java.net.URL
 import java.time.format.DateTimeFormatter
 
-private val UTF_8 = "UTF-8"
 private val PUBLICATION_ID = "maven"
-private val VERSION_JUNIT_PROPERTY = "version.junit"
-private val VERSION_JUNIT_DEFAULT = "5.6.0"
-internal val sourceFiles = listOf("**/*.java", "**/*.kt", "**/*.groovy", "**/*.scala")
 
 /**
  * Options that configure how a SCM system is represented in a project's POM
@@ -200,7 +196,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 exclude {
                     it.file.startsWith(buildDir)
                 }
-                include(sourceFiles)
+                include(SOURCE_FILES)
             }
 
             // Generate + use javadoc and sources jars
