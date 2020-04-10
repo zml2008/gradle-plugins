@@ -39,7 +39,7 @@ java {
 }
 
 tasks.withType<KotlinCompile> {
-   kotlinOptions.jvmTarget = javaRev.toString()
+    kotlinOptions.jvmTarget = javaRev.toString()
 }
 
 license {
@@ -63,22 +63,30 @@ gradlePlugin {
             }
         }
 
-        plugin(id = "opinionated",
+        plugin(
+            id = "opinionated",
             mainClass = "OpinionatedDefaultsPlugin",
             displayName = "Opinionated JVM Defaults",
-            description = "Some basic configuration for JVM projects")
-        plugin("opinionated.kotlin",
+            description = "Some basic configuration for JVM projects"
+        )
+        plugin(
+            "opinionated.kotlin",
             "OpinionatedKotlinDefaultsPlugin",
             "Opinionated Kotlin Defaults",
-            "Some basic configuration for Kotlin projects")
-        plugin("localization",
+            "Some basic configuration for Kotlin projects"
+        )
+        plugin(
+            "localization",
             "LocalizationPlugin",
             "Localization",
-            "Code generation for resource bundle strings")
-        plugin("templating",
+            "Code generation for resource bundle strings"
+        )
+        plugin(
+            "templating",
             "TemplatingPlugin",
             "Templating",
-            "Code templates")
+            "Code templates"
+        )
     }
 }
 
@@ -89,28 +97,23 @@ pluginBundle {
     tags = listOf("minecraft", "opinionated", "defaults")
 }
 
-publishing {
-    publications {
-        create("maven", MavenPublication::class) {
-            from(components["java"])
-            pom {
-                name.set(project.name)
-                description.set(pluginBundle.description)
-                url.set(pluginBundle.vcsUrl)
+publishing.publications.withType(MavenPublication::class).configureEach {
+    pom {
+        name.set(project.name)
+        description.set(pluginBundle.description)
+        url.set(pluginBundle.vcsUrl)
 
-                developers {
-                    developer {
-                        name.set("zml")
-                        email.set("zml at stellardrift [.] ca")
-                    }
-                }
+        developers {
+            developer {
+                name.set("zml")
+                email.set("zml at stellardrift [.] ca")
+            }
+        }
 
-                licenses {
-                    license {
-                        name.set("Apache 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
+        licenses {
+            license {
+                name.set("Apache 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
             }
         }
     }
