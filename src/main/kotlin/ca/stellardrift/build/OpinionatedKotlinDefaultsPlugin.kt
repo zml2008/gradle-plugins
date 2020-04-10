@@ -26,6 +26,7 @@ class OpinionatedKotlinDefaultsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             plugins.apply(OpinionatedDefaultsPlugin::class.java)
+            plugins.apply("kotlin")
 
             dependencies.apply {
                 add("implementation", "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
