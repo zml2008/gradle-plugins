@@ -97,14 +97,6 @@ data class GitlabOptions(
  */
 data class License(val name: String, val shortName: String, val url: URL) : Serializable
 
-fun apache2() =
-    License("The Apache License, Version 2.0", "Apache-2.0", URL("http://www.apache.org/licenses/LICENSE-2.0"))
-
-fun mit() = License("The MIT License", "MIT", URL("https://opensource.org/licenses/MIT"))
-fun gpl3() = License("GNU General Public License, Version 3", "GPL-3.0", URL("https://www.gnu.org/licenses/gpl-3.0.html"))
-fun agpl3() =
-    License("GNU Affero General Public License, Version 3", "AGPL-V3", URL("https://www.gnu.org/licenses/agpl-3.0.html"))
-
 
 open class OpinionatedExtension(objects: ObjectFactory) {
     /**
@@ -171,6 +163,40 @@ open class OpinionatedExtension(objects: ObjectFactory) {
     fun useJUnit5() {
         this.usesJUnit5 = true
     }
+
+    fun apache2() =
+        license.set(
+            License(
+                "The Apache License, Version 2.0",
+                "Apache-2.0",
+                URL("http://www.apache.org/licenses/LICENSE-2.0")
+            )
+        )
+
+    fun mit() = license.set(
+        License(
+            "The MIT License",
+            "MIT",
+            URL("https://opensource.org/licenses/MIT")
+        )
+    )
+
+    fun gpl3() = license.set(
+        License(
+            "GNU General Public License, Version 3",
+            "GPL-3.0",
+            URL("https://www.gnu.org/licenses/gpl-3.0.html")
+        )
+    )
+
+    fun agpl3() =
+        license.set(
+            License(
+                "GNU Affero General Public License, Version 3",
+                "AGPL-V3",
+                URL("https://www.gnu.org/licenses/agpl-3.0.html")
+            )
+        )
 }
 
 class OpinionatedDefaultsPlugin : Plugin<Project> {
@@ -209,11 +235,6 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             tasks.named("build").configure {
                 it.dependsOn(tasks.named("javadocJar"))
                 it.dependsOn(tasks.named("sourcesJar"))
-            }
-
-            // Test
-            tasks.withType(Test::class.java).configureEach {
-                it.useJUnitPlatform()
             }
 
             val requireClean = project.tasks.register("requireClean", RequireClean::class.java)
@@ -273,8 +294,12 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 tasks.withType(JavaCompile::class.java).configureEach {
                     it.options.apply {
                         encoding = UTF_8
-                        compilerArgs.addAll(listOf("-Xlint:all", "-Xlint:-serial", "-Xlint:-processing",
-                            "-Xdoclint", "-Xdoclint:-missing"))
+                        compilerArgs.addAll(
+                            listOf(
+                                "-Xlint:all", "-Xlint:-serial", "-Xlint:-processing",
+                                "-Xdoclint", "-Xdoclint:-missing"
+                            )
+                        )
                     }
                 }
 
