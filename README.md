@@ -2,7 +2,7 @@
 
 These are a collection of gradle plugins used for the projects I maintain, designed to reduce boilerplate and apply reasonable defaults.
 
-## Opinionated Defaults (`ca.stellardrift.build.opinionated`)
+## Opinionated Defaults (`ca.stellardrift.opinionated`)
 
 Applies a few settings that are common across Java projects. Most are configurable through the `opinionated` extension.
 
@@ -37,7 +37,7 @@ An example Kotlin DSL format:
 
 ```kotlin
 plugins {
-    id("ca.stellardrift.build.opinionated") version "1.0"
+    id("ca.stellardrift.opinionated") version "1.0"
 }
 
 repositories {
@@ -53,7 +53,7 @@ opinionated {
 }
 ```
 
-## Opinionated Kotlin Defaults (`ca.stellardrift.build.opinionated.kotlin`)
+## Opinionated Kotlin Defaults (`ca.stellardrift.opinionated.kotlin`)
 
 Applies a few settings specific to Kotlin JVM projects, and brings in standard opinionated defaults.
 
@@ -61,11 +61,11 @@ Applies a few settings specific to Kotlin JVM projects, and brings in standard o
 - Set the language level to whatever is chosen for Java
 - Enable use of JvmDefault on interface methods
 
-## Localization (`ca.stellardrift.build.localization`)
+## Localization (`ca.stellardrift.localization`)
 
 Using a single template, generate source files to more reliably access strings contained in resources bundles in the `src/<set>/messages` root. Currently supports automatically configuring compile tasks for Java and Kotlin.
 
-## Templating (`ca.stellardrift.build.templating`)
+## Templating (`ca.stellardrift.templating`)
 
 Given GString templates in `src/<set>/templates`, source will be generated into a generated source root. 
 

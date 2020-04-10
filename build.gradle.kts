@@ -48,12 +48,12 @@ license {
 
 
 gradlePlugin {
-    val idBase = "ca.stellardrift.build"
+    val idBase = "ca.stellardrift"
     plugins {
         fun plugin(id: String, mainClass: String, displayName: String, description: String? = null) = create(id) {
             val qualifiedId = "$idBase.$id"
             this.id = qualifiedId
-            implementationClass = "$idBase.$mainClass"
+            implementationClass = "$idBase.build.$mainClass"
             pluginBundle.plugins.maybeCreate(id).apply {
                 this.id = qualifiedId
                 this.displayName = displayName
