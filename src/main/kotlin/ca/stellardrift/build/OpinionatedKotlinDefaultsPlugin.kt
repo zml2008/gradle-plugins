@@ -32,7 +32,7 @@ class OpinionatedKotlinDefaultsPlugin : Plugin<Project> {
                 add("implementation", "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
             }
 
-            val stellardriftExtension = extensions.getByType(OpinionatedExtension::class.java)
+            val stellardriftExtension = getOrCreateExtension()
             tasks.withType(KotlinCompile::class.java).configureEach {
                 it.kotlinOptions.freeCompilerArgs += listOf("-Xjvm-default=enable")
             }

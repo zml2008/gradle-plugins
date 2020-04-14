@@ -16,204 +16,30 @@
 
 package ca.stellardrift.build
 
-import com.jfrog.bintray.gradle.BintrayExtension
-import com.jfrog.bintray.gradle.BintrayPlugin
 import net.minecrell.gradle.licenser.LicenseExtension
-import org.ajoberstar.grgit.Grgit
-import org.ajoberstar.grgit.Tag
-import org.ajoberstar.grgit.gradle.GrgitPlugin
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.provider.Property
-import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
-import org.gradle.plugins.signing.Sign
-import org.gradle.plugins.signing.SigningExtension
-import org.gradle.plugins.signing.SigningPlugin
-import java.io.Serializable
-import java.net.URL
-import java.time.format.DateTimeFormatter
 
-private val PUBLICATION_ID = "maven"
-private val DATE_FORMAT_BINTRAY = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-
-/**
- * Options that configure how a SCM system is represented in a project's POM
- */
-interface ScmOptions : Serializable {
-    val website: String
-    val scmWeb: String
-    val connection: String
-    val developerConnection: String
-    val issueTrackerName: String
-    val issueTrackerURL: String
-}
-
-
-data class GitHubOptions(
-    val userName: String,
-    val repo: String,
-    override val website: String = "https://github.com/$userName/$repo"
-) : ScmOptions {
-    override val scmWeb = "https://github.com/$userName/$repo"
-    override val connection = "scm:git:https://github.com/$userName/$repo"
-    override val developerConnection = "scm:git:ssh://git@github.com/$userName/$repo"
-    override val issueTrackerName = "GitHub"
-    override val issueTrackerURL = "https://github.com/$userName/$repo/issues"
-}
-
-data class GitlabOptions(
-    val userName: String,
-    val repo: String,
-    override val website: String = "https://gitlab.com/$userName/$repo"
-) : ScmOptions {
-    override val scmWeb = "https://gitlab.com/$userName/$repo"
-    override val connection = "scm:git:https://gitlab.com/$userName/$repo"
-    override val developerConnection = "scm:git:ssh://git@gitlab.com/$userName/$repo"
-    override val issueTrackerName = "Gitlab"
-    override val issueTrackerURL = "https://gitlab.com/$userName/$repo/-/issues"
-}
-
-/**
- * Represents a license that can be applied to software.
- *
- * The [shortName] parameter must be one of the license names supported by
- * [Bintray's](https://www.jfrog.com/confluence/display/BT/Bintray+REST+API#BintrayRESTAPI-DeleteDockerTag)
- * REST API
- */
-data class License(val name: String, val shortName: String, val url: URL) : Serializable
-
-
-open class OpinionatedExtension(objects: ObjectFactory) {
-    /**
-     * Applied to source compatibilty, target compatibilty, and Kotlin version
-     */
-    var javaVersion: JavaVersion = JavaVersion.VERSION_1_8
-
-    /**
-     * Create an automatic module name using the format `<group>.<name>`,
-     * where name has all dashes replaced with dots.
-     */
-    var automaticModuleNames = false
-
-    /**
-     * Set up JUnit Jupiter task configurations and dependencies
-     */
-    internal var usesJUnit5 = false
-
-    /**
-     * The primary publication for this project
-     */
-    lateinit var publication: MavenPublication internal set
-
-    /**
-     * A property that can automatically fill out pom options for common SCM systems.
-     * While this will take any implementation of ScmOptions,
-     * take a look at [github] and [gitlab] for some popular sites.
-     */
-    val scm: Property<ScmOptions> = objects.property(ScmOptions::class.java)
-
-    val license: Property<License> = objects.property(License::class.java)
-
-    /**
-     * Reference a GitHub repository in the pom
-     */
-    fun github(userName: String, repo: String, website: String) {
-        scm.set(GitHubOptions(userName, repo, website))
-    }
-
-    /**
-     * Reference a Gitlab repository in the pom
-     */
-    fun gitlab(userName: String, repo: String, website: String) {
-        scm.set(GitlabOptions(userName, repo, website))
-    }
-
-    /**
-     * Reference a GitHub repository in the pom, with a website set to the GitHub project page
-     */
-    fun github(userName: String, repo: String) {
-        scm.set(GitHubOptions(userName, repo))
-    }
-
-    /**
-     * Reference a Gitlab repository in the pom, with a website set to the Gitlab project page
-     */
-    fun gitlab(userName: String, repo: String) {
-        scm.set(GitlabOptions(userName, repo))
-    }
-
-    /**
-     * Enable JUnit 5 setup
-     */
-    fun useJUnit5() {
-        this.usesJUnit5 = true
-    }
-
-    fun apache2() =
-        license.set(
-            License(
-                "The Apache License, Version 2.0",
-                "Apache-2.0",
-                URL("http://www.apache.org/licenses/LICENSE-2.0")
-            )
-        )
-
-    fun mit() = license.set(
-        License(
-            "The MIT License",
-            "MIT",
-            URL("https://opensource.org/licenses/MIT")
-        )
-    )
-
-    fun gpl3() = license.set(
-        License(
-            "GNU General Public License, Version 3",
-            "GPL-3.0",
-            URL("https://www.gnu.org/licenses/gpl-3.0.html")
-        )
-    )
-
-    fun agpl3() =
-        license.set(
-            License(
-                "GNU Affero General Public License, Version 3",
-                "AGPL-V3",
-                URL("https://www.gnu.org/licenses/agpl-3.0.html")
-            )
-        )
-}
 
 class OpinionatedDefaultsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            val extension = extensions.create("opinionated", OpinionatedExtension::class.java)
+            val extension = getOrCreateExtension()
 
             plugins.apply {
                 apply("net.minecrell.licenser")
                 apply("java-library")
-                apply(GrgitPlugin::class.java)
-                apply(BintrayPlugin::class.java)
-                apply(MavenPublishPlugin::class.java)
-                apply(SigningPlugin::class.java)
             }
-
 
             project.version = rootProject.version
             project.group = rootProject.group
@@ -237,50 +63,6 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 it.dependsOn(tasks.named("sourcesJar"))
             }
 
-            val requireClean = project.tasks.register("requireClean", RequireClean::class.java)
-            val publications = extensions.getByType(PublishingExtension::class.java).run {
-                publications.register(PUBLICATION_ID, MavenPublication::class.java) {
-                    configureMavenPublication(this@with, extension, it)
-                }
-                publications
-            }
-
-            extensions.getByType(SigningExtension::class.java).apply {
-                useGpgCmd()
-                sign(publications)
-            }
-
-            tasks.withType(Sign::class.java).configureEach {
-                it.onlyIf {
-                    hasProperty("forceSign") || isRelease()
-                }
-            }
-
-
-            val bintrayExtension = extensions.getByType(BintrayExtension::class.java).apply {
-                user = findProperty("bintrayUser") as String? ?: System.getenv("BINTRAY_USER")
-                key = findProperty("bintrayKey") as String? ?: System.getenv("BINTRAY_KEY")
-                publish = true
-                pkg.apply {
-                    repo = findProperty("bintrayRepo") as String? ?: System.getenv("BINTRAY_REPO")
-                    name = project.name
-                    vcsUrl = extension.scm.orNull?.connection
-                    version.apply {
-                        val tag: Tag? = grgit?.headTag()
-                        vcsTag = tag?.name
-                        desc = tag?.fullMessage
-                        released = tag?.commit?.dateTime?.format(DATE_FORMAT_BINTRAY)
-                    }
-                    setPublications(PUBLICATION_ID)
-                }
-            }
-
-            tasks.named("bintrayUpload").configure {
-                it.dependsOn(requireClean)
-                it.onlyIf {
-                    isRelease()
-                }
-            }
 
             afterEvaluate {
                 java.apply {
@@ -316,13 +98,6 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                     it.isReproducibleFileOrder = true
                 }
 
-                bintrayExtension.pkg.apply {
-                    vcsUrl = extension.scm.orNull?.connection
-                    version.name = project.version as String
-                    extension.license.orNull?.apply {
-                        setLicenses(shortName)
-                    }
-                }
 
                 if (extension.automaticModuleNames) {
                     tasks.named("jar", Jar::class.java).configure {
@@ -353,55 +128,8 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             }
         }
     }
-
-    private fun configureMavenPublication(
-        project: Project,
-        extension: OpinionatedExtension,
-        publication: MavenPublication
-    ) {
-        extension.publication = publication
-
-        publication.apply {
-            pom.apply {
-                name.set(project.name)
-                description.set(project.description)
-                url.set(extension.scm.map { it.website })
-
-                scm { p ->
-                    p.connection.set(extension.scm.map { it.connection })
-                    p.developerConnection.set(extension.scm.map { it.developerConnection })
-                    p.url.set(extension.scm.map { it.scmWeb })
-                }
-
-                issueManagement { p ->
-                    p.system.set(extension.scm.map { it.issueTrackerName })
-                    p.url.set(extension.scm.map { it.issueTrackerURL })
-                }
-
-                licenses { p ->
-                    p.license { l ->
-                        l.name.set(extension.license.map { it.name })
-                        l.url.set(extension.license.map { it.url.toString() })
-                    }
-                }
-            }
-        }
-    }
 }
 
-open class RequireClean : DefaultTask() {
-    init {
-        group = "verification"
-    }
-
-    @TaskAction
-    fun check() {
-        val grgit = project.extensions.findByType(Grgit::class.java)
-        if (grgit != null && !grgit.status().isClean) {
-            throw GradleException("Source root must be clean! Make sure your changes are committed")
-        }
-    }
-}
 
 fun DependencyHandler.apAnd(scope: String, spec: String, configure: Dependency.() -> Unit = {}) = run {
     add("annotationProcessor", spec)?.apply(configure)
@@ -414,26 +142,3 @@ fun <T : Dependency> DependencyHandler.apAnd(scope: String, spec: T, configure: 
     add(scope, spec)?.apply { configure(this as T) }
 }
 
-/**
- * Verify that this project is checked out to a release version, meaning that:
- *
- * - The version does not contain SNAPSHOT
- * - The project is managed within a Git repository
- * - the current head commit is tagged
- */
-fun Project.isRelease(): Boolean {
-    val tag = (grgit ?: return false).headTag()
-
-    return tag != null&&
-            !(version as String).contains("SNAPSHOT")
-}
-
-private val Project.grgit get() = extensions.findByType(Grgit::class.java)
-
-/**
- * Find a tag, if any, that corresponds with the current checked out commit
- */
-fun Grgit.headTag(): Tag?  {
-    val headCommit = head()
-    return tag.list().find { it.commit == headCommit }
-}

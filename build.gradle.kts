@@ -79,6 +79,12 @@ gradlePlugin {
             "Some basic configuration for Kotlin projects"
         )
         plugin(
+                id = "opinionated.publish",
+                mainClass = "OpinionatedPublishingPlugin",
+                displayName = "Opinionated Publishing",
+                description = "Common publishing setup options"
+        )
+        plugin(
             "localization",
             "LocalizationPlugin",
             "Localization",
