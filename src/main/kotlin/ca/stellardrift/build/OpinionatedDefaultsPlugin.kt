@@ -213,7 +213,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 apply(SigningPlugin::class.java)
             }
 
-            val grgit = project.extensions.getByType(Grgit::class.java)
+            val grgit = project.extensions.findByType(Grgit::class.java)
 
             project.version = rootProject.version
             project.group = rootProject.group
@@ -266,8 +266,8 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                     name = project.name
                     vcsUrl = extension.scm.orNull?.connection
                     version.apply {
-                        val tagRef = grgit.repository.jgit.tagList().call().firstOrNull()
-                        val tag: Tag? = grgit.resolve.toTag(tagRef?.name)
+                        val tagRef = grgit?.run { repository.jgit.tagList().call().firstOrNull() }
+                        val tag: Tag? = grgit?.resolve?.toTag(tagRef?.name)
                         name = project.version as String
                         vcsTag = tag?.name
                         desc = tag?.fullMessage
@@ -397,8 +397,8 @@ open class RequireClean : DefaultTask() {
 
     @TaskAction
     fun check() {
-        val grgit = project.extensions.getByType(Grgit::class.java)
-        if (!grgit.status().isClean) {
+        val grgit = project.extensions.findByType(Grgit::class.java)
+        if (grgit != null && !grgit.status().isClean) {
             throw GradleException("Source root must be clean! Make sure your changes are committed")
         }
     }
@@ -416,7 +416,7 @@ fun <T : Dependency> DependencyHandler.apAnd(scope: String, spec: T, configure: 
 }
 
 fun Project.isRelease(): Boolean {
-    val grgit = extensions.getByType(Grgit::class.java)
+    val grgit = extensions.findByType(Grgit::class.java) ?: return false
     val tagRef = grgit.repository.jgit.tagList().call().firstOrNull()
     val tag: Tag? = grgit.resolve.toTag(tagRef?.name)
     val headCommit = grgit.head()
