@@ -300,6 +300,9 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                                 "-Xdoclint", "-Xdoclint:-missing"
                             )
                         )
+                        if (JavaVersion.toVersion(it.toolChain.version).isJava9Compatible) {
+                            compilerArgs.addAll(listOf("--release", extension.javaVersion.majorVersion))
+                        }
                     }
                 }
 
