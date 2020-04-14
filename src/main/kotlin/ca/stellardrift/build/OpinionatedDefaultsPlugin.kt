@@ -50,6 +50,7 @@ import java.net.URL
 import java.time.format.DateTimeFormatter
 
 private val PUBLICATION_ID = "maven"
+private val DATE_FORMAT_BINTRAY = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
 /**
  * Options that configure how a SCM system is represented in a project's POM
@@ -213,7 +214,6 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 apply(SigningPlugin::class.java)
             }
 
-            val grgit = project.extensions.findByType(Grgit::class.java)
 
             project.version = rootProject.version
             project.group = rootProject.group
@@ -266,12 +266,10 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                     name = project.name
                     vcsUrl = extension.scm.orNull?.connection
                     version.apply {
-                        val tagRef = grgit?.run { repository.jgit.tagList().call().firstOrNull() }
-                        val tag: Tag? = grgit?.resolve?.toTag(tagRef?.name)
-                        name = project.version as String
+                        val tag: Tag? = grgit?.headTag()
                         vcsTag = tag?.name
                         desc = tag?.fullMessage
-                        released = tag?.commit?.dateTime?.format(DateTimeFormatter.ISO_INSTANT)
+                        released = tag?.commit?.dateTime?.format(DATE_FORMAT_BINTRAY)
                     }
                     setPublications(PUBLICATION_ID)
                 }
@@ -320,6 +318,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
 
                 bintrayExtension.pkg.apply {
                     vcsUrl = extension.scm.orNull?.connection
+                    version.name = project.version as String
                     extension.license.orNull?.apply {
                         setLicenses(shortName)
                     }
@@ -415,12 +414,26 @@ fun <T : Dependency> DependencyHandler.apAnd(scope: String, spec: T, configure: 
     add(scope, spec)?.apply { configure(this as T) }
 }
 
+/**
+ * Verify that this project is checked out to a release version, meaning that:
+ *
+ * - The version does not contain SNAPSHOT
+ * - The project is managed within a Git repository
+ * - the current head commit is tagged
+ */
 fun Project.isRelease(): Boolean {
-    val grgit = extensions.findByType(Grgit::class.java) ?: return false
-    val tagRef = grgit.repository.jgit.tagList().call().firstOrNull()
-    val tag: Tag? = grgit.resolve.toTag(tagRef?.name)
-    val headCommit = grgit.head()
+    val tag = (grgit ?: return false).headTag()
 
-    return tag?.commit?.id.equals(headCommit?.id) &&
+    return tag != null&&
             !(version as String).contains("SNAPSHOT")
+}
+
+private val Project.grgit get() = extensions.findByType(Grgit::class.java)
+
+/**
+ * Find a tag, if any, that corresponds with the current checked out commit
+ */
+fun Grgit.headTag(): Tag?  {
+    val headCommit = head()
+    return tag.list().find { it.commit == headCommit }
 }
