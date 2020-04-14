@@ -31,7 +31,7 @@ class GradlePluginsPluginTest {
         // Create a test project and apply the plugin
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("java-library")
-        project.plugins.apply("ca.stellardrift.build.localization")
+        project.plugins.apply("ca.stellardrift.localization")
 
         // Verify the result
         assertNotNull(project.tasks.findByName("generateLocalization"))
@@ -41,13 +41,18 @@ class GradlePluginsPluginTest {
         // Create a test project and apply the plugin
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("java-library")
-        project.plugins.apply("ca.stellardrift.build.templating")
+        project.plugins.apply("ca.stellardrift.templating")
 
         // Verify the result
         assertNotNull(project.tasks.findByName("generateTemplates"))
     }
 
     @Test fun `opinionated defaults plugin test`() {
+        val project = ProjectBuilder.builder()
+            .withName("widget-party")
+            .build()
+        project.plugins.apply("ca.stellardrift.opinionated")
 
+        assertNotNull(project.tasks.findByName("requireClean"))
     }
 }
