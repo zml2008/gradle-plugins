@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "ca.stellardrift"
-version = "1.0.1"
+version = "1.1-SNAPSHOT"
 
 repositories {
     jcenter()
@@ -50,13 +50,16 @@ license {
 gradlePlugin {
     val idBase = "ca.stellardrift"
     plugins {
-        fun plugin(id: String, mainClass: String, displayName: String, description: String? = null) = create(id) {
+        fun plugin(id: String, mainClass: String, displayName: String, description: String? = null, tags: List<String> = listOf()) = create(id) {
             val qualifiedId = "$idBase.$id"
             this.id = qualifiedId
             implementationClass = "$idBase.build.$mainClass"
             pluginBundle.plugins.maybeCreate(id).apply {
                 this.id = qualifiedId
                 this.displayName = displayName
+                if (tags.isNotEmpty()) {
+                    this.tags = tags
+                }
                 if (description != null) {
                     this.description = description
                 }
@@ -79,13 +82,15 @@ gradlePlugin {
             "localization",
             "LocalizationPlugin",
             "Localization",
-            "Code generation for resource bundle strings"
+            "Code generation for resource bundle strings",
+                tags = listOf("codegen", "i18n", "l10n", "generation")
         )
         plugin(
             "templating",
             "TemplatingPlugin",
             "Templating",
-            "Code templates"
+            "Code templates",
+            tags = listOf("codegen", "templates", "generation")
         )
     }
 }
