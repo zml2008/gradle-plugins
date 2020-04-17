@@ -53,6 +53,15 @@ class GradlePluginsPluginTest {
             .build()
         project.plugins.apply("ca.stellardrift.opinionated")
 
+        assertNotNull(project.extensions.findByName("opinionated"))
+    }
+
+    @Test fun `opinionated defaults publishing plugin test`() {
+        val project = ProjectBuilder.builder()
+                .withName("widget-party")
+                .build()
+        project.plugins.apply("ca.stellardrift.opinionated.publish")
+
         assertNotNull(project.tasks.findByName("requireClean"))
     }
 }
