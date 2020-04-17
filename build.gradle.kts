@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "ca.stellardrift"
-version = "2.0"
+version = "2.1-SNAPSHOT"
 
 repositories {
     jcenter()
