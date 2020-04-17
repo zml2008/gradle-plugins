@@ -80,7 +80,7 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
                 version.apply {
                     val tag: Tag? = grgit?.headTag()
                     vcsTag = tag?.name
-                    desc = tag?.fullMessage
+                    desc = tag?.shortMessage
                     released = tag?.commit?.dateTime?.format(DATE_FORMAT_BINTRAY)
                 }
                 setPublications(PUBLICATION_ID)

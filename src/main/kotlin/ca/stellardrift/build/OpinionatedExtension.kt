@@ -87,9 +87,10 @@ open class OpinionatedExtension(objects: ObjectFactory) {
     internal var usesJUnit5 = false
 
     /**
-     * The primary publication for this project
+     * The primary publication for this project.
+     * If the publishing plugin is not applied, this will be null.
      */
-    lateinit var publication: MavenPublication internal set
+    var publication: MavenPublication? internal set
 
     /**
      * A property that can automatically fill out pom options for common SCM systems.
@@ -168,6 +169,10 @@ open class OpinionatedExtension(objects: ObjectFactory) {
                         URL("https://www.gnu.org/licenses/agpl-3.0.html")
                 )
         )
+    
+    init {
+        publication = null
+    }
 }
 
 internal const val EXTENSION_NAME = "opinionated"
