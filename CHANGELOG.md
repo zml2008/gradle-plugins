@@ -1,3 +1,9 @@
+# 2.0
+
+- Split publishing options into their own plugin -- some projects have more custom needs on one or both of publishing and compilation
+- Fix releasing when multiple tags are defined
+- Allow releasing any tag, not just the latest
+- Correct date format for Bintray
 
 # 1.0.1
 
@@ -8,7 +14,6 @@
 - License setters are now methods on the extension class, not standalone extension functions.
 - Use the `--release` javac argument to enforce the usage of correct library methods on JDKs >= 9
 - Opinionated plugin will function on projects not managed with git
-
 
 # 1.0
 
