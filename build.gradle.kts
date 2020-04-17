@@ -5,8 +5,7 @@ plugins {
     id("com.gradle.plugin-publish") version "0.11.0"
     `maven-publish`
 
-    kotlin("jvm") version "1.3.71"
-    id("net.minecrell.licenser") version "0.4.1"
+    id("ca.stellardrift.opinionated.kotlin") version "2.0"
 
 }
 
@@ -29,17 +28,6 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
-}
-
-
-val javaRev = JavaVersion.VERSION_1_8
-java {
-    sourceCompatibility = javaRev
-    targetCompatibility = javaRev
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = javaRev.toString()
 }
 
 license {
@@ -67,16 +55,16 @@ gradlePlugin {
         }
 
         plugin(
-            id = "opinionated",
-            mainClass = "OpinionatedDefaultsPlugin",
-            displayName = "Opinionated JVM Defaults",
-            description = "Some basic configuration for JVM projects"
+                id = "opinionated",
+                mainClass = "OpinionatedDefaultsPlugin",
+                displayName = "Opinionated JVM Defaults",
+                description = "Some basic configuration for JVM projects"
         )
         plugin(
-            "opinionated.kotlin",
-            "OpinionatedKotlinDefaultsPlugin",
-            "Opinionated Kotlin Defaults",
-            "Some basic configuration for Kotlin projects"
+                "opinionated.kotlin",
+                "OpinionatedKotlinDefaultsPlugin",
+                "Opinionated Kotlin Defaults",
+                "Some basic configuration for Kotlin projects"
         )
         plugin(
                 id = "opinionated.publish",
@@ -85,18 +73,18 @@ gradlePlugin {
                 description = "Common publishing setup options"
         )
         plugin(
-            "localization",
-            "LocalizationPlugin",
-            "Localization",
-            "Code generation for resource bundle strings",
+                "localization",
+                "LocalizationPlugin",
+                "Localization",
+                "Code generation for resource bundle strings",
                 tags = listOf("codegen", "i18n", "l10n", "generation")
         )
         plugin(
-            "templating",
-            "TemplatingPlugin",
-            "Templating",
-            "Code templates",
-            tags = listOf("codegen", "templates", "generation")
+                "templating",
+                "TemplatingPlugin",
+                "Templating",
+                "Code templates",
+                tags = listOf("codegen", "templates", "generation")
         )
     }
 }
