@@ -42,8 +42,8 @@ data class GitHubOptions(
     override val website: String = "https://github.com/$userName/$repo"
 ) : ScmOptions {
     override val scmWeb = "https://github.com/$userName/$repo"
-    override val connection = "scm:git:https://github.com/$userName/$repo"
-    override val developerConnection = "scm:git:ssh://git@github.com/$userName/$repo"
+    override val connection = "scm:git:https://github.com/$userName/$repo.git"
+    override val developerConnection = "scm:git:ssh://git@github.com/$userName/$repo.git"
     override val issueTrackerName = "GitHub"
     override val issueTrackerURL = "https://github.com/$userName/$repo/issues"
 }
@@ -54,8 +54,8 @@ data class GitlabOptions(
     override val website: String = "https://gitlab.com/$userName/$repo"
 ) : ScmOptions {
     override val scmWeb = "https://gitlab.com/$userName/$repo"
-    override val connection = "scm:git:https://gitlab.com/$userName/$repo"
-    override val developerConnection = "scm:git:ssh://git@gitlab.com/$userName/$repo"
+    override val connection = "scm:git:https://gitlab.com/$userName/$repo.git"
+    override val developerConnection = "scm:git:ssh://git@gitlab.com/$userName/$repo.git"
     override val issueTrackerName = "Gitlab"
     override val issueTrackerURL = "https://gitlab.com/$userName/$repo/-/issues"
 }

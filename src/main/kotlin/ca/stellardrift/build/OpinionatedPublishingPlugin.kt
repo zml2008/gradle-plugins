@@ -96,7 +96,7 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
 
         afterEvaluate {
             bintrayExtension.pkg.apply {
-                vcsUrl = extension.scm.orNull?.connection
+                vcsUrl = extension.scm.orNull?.scmWeb + ".git"
                 version.name = project.version as String
                 extension.license.orNull?.apply {
                     setLicenses(shortName)
