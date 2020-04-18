@@ -2,12 +2,35 @@
 
 These are a collection of gradle plugins used for the projects I maintain, designed to reduce boilerplate and apply reasonable defaults.
 
-## Opinionated Defaults (`ca.stellardrift.opinionated`)
+## Example
+
+An example Kotlin DSL format:
+
+```kotlin
+plugins {
+    id("ca.stellardrift.opinionated") version "2.0"
+    id("ca.stellardrift.opinionated.publish") version "2.0"
+}
+
+repositories {
+    sponge()
+}
+
+opinionated {
+    github("zml2008", "gradle-plugins")
+    gpl3()
+    publication!!.apply {
+        from(configurations["java"])
+    }
+}
+```
+
+## [Opinionated Defaults](https://plugins.gradle.org/plugin/ca.stellardrift.opinionated)
 
 Applies a few settings that are common across Java projects. Most are configurable through the `opinionated` extension.
 
 - Sets project groupId, version from the root project, and description
-- Applies the licenser and maven publish plugins
+- Applies the licenser plugin
 - Limits licensing plugin to only java, kotlin, groovy, and scala files, and excludes files (such as generated sources) in the build directory
 - Automatically build source and javadoc jars
 - Use UTF-8 for java and javadoc encodings
@@ -15,7 +38,7 @@ Applies a few settings that are common across Java projects. Most are configurab
 - Activate all compiler warnings, except for requiring `serialVersionUid`, and doclint warnings
 - Allows configuring JUnit 5 with the `useJUnit5()` method on the extension. If a custom JUnit version is desired, the version can be configured with the `version.junit` property.
 
-### Publication
+## [Opinionated Publication](https://plugins.gradle.org/plugin/ca.stellardrift.opinionated.publish)
 This plugin sets up publishing, with a publication named `maven`, applying appropriate options from the project, and configuring publication to `bintray`
 
 Authentication to bintray is done with the following project properties or environment variables
@@ -31,29 +54,8 @@ The `bintrayUpload` task is restricted to only run when the local checkout is cl
 The signing plugin is configured to sign any publication, but will only run on release builds or if the `forceSign` property is set.
 
 
-### Example
 
-An example Kotlin DSL format:
-
-```kotlin
-plugins {
-    id("ca.stellardrift.opinionated") version "1.0"
-}
-
-repositories {
-    sponge()
-}
-
-opinionated {
-    github("zml2008", "gradle-plugins")
-    license.set(gpl3())
-    publication.apply {
-        from(configurations["java"])
-    }
-}
-```
-
-## Opinionated Kotlin Defaults (`ca.stellardrift.opinionated.kotlin`)
+## [Opinionated Kotlin Defaults](https://plugins.gradle.org/plugin/ca.stellardrift.opinionated.kotlin)
 
 Applies a few settings specific to Kotlin JVM projects, and brings in standard opinionated defaults.
 
@@ -61,7 +63,7 @@ Applies a few settings specific to Kotlin JVM projects, and brings in standard o
 - Set the language level to whatever is chosen for Java
 - Enable use of JvmDefault on interface methods
 
-## Localization (`ca.stellardrift.localization`)
+## [Localization](https://plugins.gradle.org/plugin/ca.stellardrift.localization)
 
 Using a single template, generate source files to more reliably access strings contained in resources bundles in the `src/<set>/messages` root. Currently supports automatically configuring compile tasks for Java and Kotlin. A messages class template in GString format must be provided. This template will get the following parameters:
 
@@ -79,7 +81,7 @@ Property | Type | Use
 `templateFile` | File property | The location of the template file to use
 `templateType` | TemplateType | The language the template is written in
 
-## Templating (`ca.stellardrift.templating`)
+## [Templating](https://plugins.gradle.org/plugin/ca.stellardrift.templating) 
 
 Given GString templates in `src/<set>/templates`, source will be generated into a generated source root. 
 
