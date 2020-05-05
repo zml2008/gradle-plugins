@@ -17,6 +17,7 @@
 package ca.stellardrift.build
 
 import net.minecrell.gradle.licenser.LicenseExtension
+import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -29,6 +30,7 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
 
 
 class OpinionatedDefaultsPlugin : Plugin<Project> {
@@ -87,8 +89,19 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 }
 
                 tasks.withType(Javadoc::class.java).configureEach {
-                    it.options.apply {
-                        encoding = UTF_8
+                    val options = it.options
+                    val version = JavaVersion.toVersion(it.toolChain.version)
+                    if (version == JavaVersion.VERSION_12) {
+                        throw GradleException("Javadoc cannot be generated on JDK 12 -- " +
+                                "see https://bugs.openjdk.java.net/browse/JDK-8222091")
+                    }
+                    options.encoding = UTF_8
+                    if (options is StandardJavadocDocletOptions) {
+                        options.source = extension.javaVersion.toString()
+                        if (version.isJava9Compatible) {
+                            options.addBooleanOption("html5", true)
+                        }
+                        options.linkSource()
                     }
                 }
 
