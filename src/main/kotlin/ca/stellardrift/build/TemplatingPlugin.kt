@@ -66,13 +66,14 @@ class TemplatingPlugin : Plugin<Project> {
                             .apply {
                                 kotlin.srcDir(task.map { it.outputs })
                             }
-                        tasks.named(src.getCompileTaskName("Kotlin")) { t ->
+                        tasks.named(src.getCompileTaskName("Kotlin")).configure { t ->
                             t.dependsOn(task)
                         }
 
-                    } else if (plugins.hasPlugin(JavaPlugin::class.java)) {
+                    }
+                    if (plugins.hasPlugin(JavaPlugin::class.java)) {
                         src.java.srcDir(task.map { it.outputs })
-                        tasks.named(src.compileJavaTaskName) { t ->
+                        tasks.named(src.compileJavaTaskName).configure { t ->
                             t.dependsOn(task)
                         }
                     }
