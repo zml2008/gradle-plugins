@@ -78,8 +78,10 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                         encoding = UTF_8
                         compilerArgs.addAll(
                             listOf(
-                                "-Xlint:all", "-Xlint:-serial", "-Xlint:-processing",
-                                "-Xdoclint", "-Xdoclint:-missing"
+                                "-Xlint:all",
+                                "-Xlint:-serial",  // ignore missing serialVersionUID
+                                "-Xlint:-processing", // don't warn when annotation processors aren't claimed
+                                "-Xdoclint", "-Xdoclint:-missing" // javadoc: warn about everything except missing comment
                             )
                         )
                         if (JavaVersion.toVersion(it.toolChain.version).isJava9Compatible) {
