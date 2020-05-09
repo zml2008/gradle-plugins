@@ -37,9 +37,16 @@ fun RepositoryHandler.jitpack() = maven {
     it.url = URI("https://jitpack.io")
 }
 
-fun RepositoryHandler.velocity() = maven {
+fun RepositoryHandler.velocity() = velocitySnapshots()
+
+fun RepositoryHandler.velocitySnapshots() = maven {
     it.name = "velocity"
     it.url = URI("https://repo.velocitypowered.com/snapshots")
+}
+
+fun RepositoryHandler.velocityReleases() = maven {
+    it.name = "velocity"
+    it.url = URI("https://repo.velocitypowered.com/releases")
 }
 
 fun RepositoryHandler.spigot() = maven {
