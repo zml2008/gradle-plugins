@@ -41,6 +41,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             plugins.apply {
                 apply("net.minecrell.licenser")
                 apply("java-library")
+                apply("org.jlleitschuh.gradle.ktlint") // Useful even on non-Kotlin projects for buildscript formatting
             }
 
             project.version = rootProject.version

@@ -25,6 +25,7 @@ dependencies {
     implementation("gradle.plugin.net.minecrell:licenser:0.4.1")
     implementation("org.ajoberstar.grgit:grgit-gradle:4.0.2")
     implementation("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5")
+    implementation("org.jlleitschuh.gradle:ktlint-gradle:9.2.1")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
