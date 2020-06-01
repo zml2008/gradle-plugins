@@ -1,6 +1,7 @@
 # 3.0
 
 - Divide plugins into submodules to reduce which dependencies need to be pulled in. **This will change artifact IDs and classes, so this is technically a breaking change.
+- Remove `implementationInclude`/`apAnd`-type methods since it turns out Gradle has a way to do that already.
 - Apply ktlint plugin for buildscript linting
 - If a file named `LICENSE_HEADER` exists in the project root, it will now be used for licensing
 - Automatically add a Javadoc link to the appropriate JDK version
