@@ -30,13 +30,17 @@ opinionated {
 Applies a few settings that are common across Java projects. Most are configurable through the `opinionated` extension.
 
 - Sets project groupId, version from the root project, and description
-- Applies the licenser plugin
+- Applies the licenser plugin, and if a `LICENSE_HEADER` file is present in the root project, configures all subprojects to use that file.
 - Limits licensing plugin to only java, kotlin, groovy, and scala files, and excludes files (such as generated sources) in the build directory
-- Automatically build source and javadoc jars
-- Use UTF-8 for java and javadoc encodings
-- Configure all archive tasks for reproducible archives
-- Activate all compiler warnings, except for requiring `serialVersionUid`, and doclint warnings
+- Automatically builds source and javadoc jars
+- Uses UTF-8 for java and javadoc encodings
+- Automatically links to the appropriate JDK javadoc for the targeted Java version
+- Configures all archive tasks for reproducible archives
+- Activates all compiler warnings, except for requiring `serialVersionUid`, and doclint warnings
 - Allows configuring JUnit 5 with the `useJUnit5()` method on the extension. If a custom JUnit version is desired, the version can be configured with the `version.junit` property.
+- Applies workarounds for JDK bugs to build properly from JDK8 through current
+- If a checkstyle configuration is present at `$rootProject/etc/checkstyle/checkstyle.xml`, configures the checkstyle plugin to use it
+- Applies [ktlint](https://github.com/JLLeitschuh/ktlint-gradle) plugin to lint Gradle kotlin build files
 
 ## [Opinionated Publication](https://plugins.gradle.org/plugin/ca.stellardrift.opinionated.publish)
 This plugin sets up publishing, with a publication named `maven`, applying appropriate options from the project, and configuring publication to `bintray`
@@ -62,6 +66,14 @@ Applies a few settings specific to Kotlin JVM projects, and brings in standard o
 - Depend on the Kotlin jdk8 stdlib
 - Set the language level to whatever is chosen for Java
 - Enable use of JvmDefault on interface methods
+- Inherits `ktlint` plugin from opinionated plugin to enforce standard formatting
+
+## [Opinionated Fabric Defaults](https://plugins.gradle.org/plugin/ca.stellardrift.opinionated.fabric)
+**Note:** Requires the Fabric maven repository to be added to the `settings.gradle.kts`
+
+- Applies the Fabric Loom plugin
+- Sets up a `testmod` source set for a test mod that is loaded in the Gradle run tasks
+- Configures any Javadoc generation tasks to link to the appropriate versions of Yarn and Fabric API javadocs.
 
 ## [Localization](https://plugins.gradle.org/plugin/ca.stellardrift.localization)
 
