@@ -4,9 +4,10 @@ plugins {
     `java-gradle-plugin`
     id("com.gradle.plugin-publish")
     `maven-publish`
+    kotlin("jvm") version "1.3.72" // we must override what we're providing ourself... whoo circular dependencies
 
-    id("ca.stellardrift.opinionated.kotlin") version "2.0"
-
+    id("ca.stellardrift.opinionated.kotlin") version "2.0.1"
+    id("com.github.ben-manes.versions") version "0.28.0"
 }
 
 group = "ca.stellardrift"
