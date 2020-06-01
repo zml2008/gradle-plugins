@@ -24,6 +24,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Jar
@@ -71,6 +72,17 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 it.dependsOn(tasks.named("sourcesJar"))
             }
 
+            val checkstyleDir = rootProject.projectDir.resolve("etc/checkstyle")
+            if (checkstyleDir.isDirectory && checkstyleDir.resolve("checkstyle.xml").isFile) {
+                plugins.apply("checkstyle")
+                extensions.configure(CheckstyleExtension::class.java) {
+                    it.toolVersion = "8.32"
+                    it.configDirectory.set(checkstyleDir)
+                    it.configProperties = mapOf(
+                        "severity" to "error"
+                    )
+                }
+            }
 
             afterEvaluate {
                 java.apply {
