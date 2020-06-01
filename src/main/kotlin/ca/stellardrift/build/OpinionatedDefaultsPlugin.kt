@@ -109,6 +109,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                         if (version.isJava9Compatible) {
                             options.addBooleanOption("html5", true)
                         }
+                        options.links(extension.javaVersion.javaDocLinkUrl)
                         options.linkSource()
                     }
                 }
@@ -145,21 +146,28 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                         }
                     }
                 }
-
             }
         }
     }
 }
 
-
+@Deprecated(message = "Use nested dependencies", replaceWith = ReplaceWith("annotationProcessor(\"\$scope\"(spec, configure)!!)"))
 fun DependencyHandler.apAnd(scope: String, spec: String, configure: Dependency.() -> Unit = {}) = run {
     add("annotationProcessor", spec)?.apply(configure)
     add(scope, spec)?.apply(configure)
 }
 
+@Deprecated(message = "Use nested dependencies", replaceWith = ReplaceWith("annotationProcessor(\"\$scope\"(spec, configure)!!)"))
 @Suppress("UNCHECKED_CAST")
 fun <T : Dependency> DependencyHandler.apAnd(scope: String, spec: T, configure: T.() -> Unit = {}) = run {
     add("annotationProcessor", spec)?.apply { configure(this as T) }
     add(scope, spec)?.apply { configure(this as T) }
 }
 
+internal val JavaVersion.javaDocLinkUrl: String get() {
+    return if (isJava11Compatible) {
+        "https://docs.oracle.com/en/java/javase/$majorVersion/docs/api"
+    } else {
+        "https://docs.oracle.com/javase/$majorVersion/docs/api"
+    }
+}
