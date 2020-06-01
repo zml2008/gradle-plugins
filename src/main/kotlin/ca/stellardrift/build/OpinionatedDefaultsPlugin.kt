@@ -52,6 +52,11 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                     it.file.startsWith(buildDir)
                 }
                 include(SOURCE_FILES)
+
+                val headerFile = rootProject.file("LICENSE_HEADER")
+                if (headerFile.isFile) {
+                    header = headerFile
+                }
             }
 
             // Generate + use javadoc and sources jars
