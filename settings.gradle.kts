@@ -8,3 +8,8 @@
  */
 
 rootProject.name = "gradle-plugins"
+
+listOf("opinionated-fabric").forEach {
+  include(":$it")
+  findProject(":$it")?.name = "gradle-plugin-$it"
+}

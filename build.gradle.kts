@@ -1,8 +1,8 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import ca.stellardrift.build.self.declarePlugin
 
 plugins {
     `java-gradle-plugin`
-    id("com.gradle.plugin-publish") version "0.11.0"
+    id("com.gradle.plugin-publish")
     `maven-publish`
 
     id("ca.stellardrift.opinionated.kotlin") version "2.0"
@@ -12,10 +12,6 @@ plugins {
 group = "ca.stellardrift"
 version = "2.1-SNAPSHOT"
 
-repositories {
-    jcenter()
-    gradlePluginPortal()
-}
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
@@ -31,89 +27,81 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
-license {
-    header = rootProject.file("LICENSE_HEADER")
+    declarePlugin(
+            id = "opinionated",
+            mainClass = "OpinionatedDefaultsPlugin",
+            displayName = "Opinionated JVM Defaults",
+            description = "Some basic configuration for JVM projects"
+    )
+    declarePlugin(
+            "opinionated.kotlin",
+            "OpinionatedKotlinDefaultsPlugin",
+            "Opinionated Kotlin Defaults",
+            "Some basic configuration for Kotlin projects"
+    )
+    declarePlugin(
+            id = "opinionated.publish",
+            mainClass = "OpinionatedPublishingPlugin",
+            displayName = "Opinionated Publishing",
+            description = "Common publishing setup options"
+    )
+    declarePlugin(
+            "localization",
+            "LocalizationPlugin",
+            "Localization",
+            "Code generation for resource bundle strings",
+            tags = listOf("codegen", "i18n", "l10n", "generation")
+    )
+    declarePlugin(
+            "templating",
+            "TemplatingPlugin",
+            "Templating",
+            "Code templates",
+            tags = listOf("codegen", "templates", "generation")
+    )
+
+subprojects {
+    apply(plugin="java-gradle-plugin")
+    apply(plugin="com.gradle.plugin-publish")
+    apply(plugin="maven-publish")
+    apply(plugin="ca.stellardrift.opinionated.kotlin")
 }
 
-
-gradlePlugin {
-    val idBase = "ca.stellardrift"
-    plugins {
-        fun plugin(id: String, mainClass: String, displayName: String, description: String? = null, tags: List<String> = listOf()) = create(id) {
-            val qualifiedId = "$idBase.$id"
-            this.id = qualifiedId
-            implementationClass = "$idBase.build.$mainClass"
-            pluginBundle.plugins.maybeCreate(id).apply {
-                this.id = qualifiedId
-                this.displayName = displayName
-                if (tags.isNotEmpty()) {
-                    this.tags = tags
-                }
-                if (description != null) {
-                    this.description = description
-                }
-            }
-        }
-
-        plugin(
-                id = "opinionated",
-                mainClass = "OpinionatedDefaultsPlugin",
-                displayName = "Opinionated JVM Defaults",
-                description = "Some basic configuration for JVM projects"
-        )
-        plugin(
-                "opinionated.kotlin",
-                "OpinionatedKotlinDefaultsPlugin",
-                "Opinionated Kotlin Defaults",
-                "Some basic configuration for Kotlin projects"
-        )
-        plugin(
-                id = "opinionated.publish",
-                mainClass = "OpinionatedPublishingPlugin",
-                displayName = "Opinionated Publishing",
-                description = "Common publishing setup options"
-        )
-        plugin(
-                "localization",
-                "LocalizationPlugin",
-                "Localization",
-                "Code generation for resource bundle strings",
-                tags = listOf("codegen", "i18n", "l10n", "generation")
-        )
-        plugin(
-                "templating",
-                "TemplatingPlugin",
-                "Templating",
-                "Code templates",
-                tags = listOf("codegen", "templates", "generation")
-        )
+allprojects {
+    repositories {
+        jcenter()
+        gradlePluginPortal()
     }
-}
 
-pluginBundle {
-    website = "https://github.com/zml2008/gradle-plugins"
-    vcsUrl = "https://github.com/zml2008/gradle-plugins"
-    description = "A suite of plugins to apply defaults preferred for Stellardrift projects"
-    tags = listOf("minecraft", "opinionated", "defaults")
-}
+    license {
+        header = rootProject.file("LICENSE_HEADER")
+    }
 
-publishing.publications.withType(MavenPublication::class).configureEach {
-    pom {
-        name.set(project.name)
-        description.set(pluginBundle.description)
-        url.set(pluginBundle.vcsUrl)
+    pluginBundle {
+        website = "https://github.com/zml2008/gradle-plugins"
+        vcsUrl = "https://github.com/zml2008/gradle-plugins"
+        description = "A suite of plugins to apply defaults preferred for Stellardrift projects"
+        tags = listOf("minecraft", "opinionated", "defaults")
+    }
 
-        developers {
-            developer {
-                name.set("zml")
-                email.set("zml at stellardrift [.] ca")
+    publishing.publications.withType(MavenPublication::class).configureEach {
+        pom {
+            name.set(project.name)
+            description.set(pluginBundle.description)
+            url.set(pluginBundle.vcsUrl)
+
+            developers {
+                developer {
+                    name.set("zml")
+                    email.set("zml at stellardrift [.] ca")
+                }
             }
-        }
 
-        licenses {
-            license {
-                name.set("Apache 2.0")
-                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+            licenses {
+                license {
+                    name.set("Apache 2.0")
+                    url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                }
             }
         }
     }
