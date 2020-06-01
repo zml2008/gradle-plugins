@@ -59,6 +59,11 @@ fun RepositoryHandler.paper() = maven {
     it.url = URI("https://papermc.io/repo/repository/maven-public")
 }
 
+fun RepositoryHandler.pex() = maven {
+    it.name = "pex"
+    it.url = URI("https://repo.glaremasters.me/repository/permissionsex")
+}
+
 fun DependencyHandler.configurate(comp: String, version: Any? = null): String {
     return "org.spongepowered:configurate-$comp${if (version == null) "" else ":$version"}"
 }
@@ -67,9 +72,14 @@ fun DependencyHandler.kyoriText(comp: String, version: Any): String {
     return "net.kyori:text-$comp:$version"
 }
 
+fun DependencyHandler.adventure(component: String, version: Any? = null): String {
+    return "net.kyori:adventure-$component${if (version == null) "" else ":$version"}"
+}
+
 /**
  * For fabric environments, both include a mod (in Jar-in-Jar), and expose as an api dependency
  */
+@Deprecated("Use nested dependency declarations instead, like `modApi(include(...)!!)`")
 fun DependencyHandler.apiInclude(spec: String, configure: ExternalModuleDependency.() -> Unit = {}) {
     add("modApi", spec)?.apply {
         (this as ExternalModuleDependency).apply(configure)
@@ -82,6 +92,7 @@ fun DependencyHandler.apiInclude(spec: String, configure: ExternalModuleDependen
 /**
  * For fabric environments, both include a mod (in Jar-in-Jar), and expose as an implementation dependency
  */
+@Deprecated("Use nested dependency declarations instead, like `modApi(include(...)!!)`")
 fun DependencyHandler.implementationInclude(spec: String, configure: ExternalModuleDependency.() -> Unit = {}) {
     add("modImplementation", spec)?.apply {
         (this as ExternalModuleDependency).apply(configure)
@@ -94,6 +105,7 @@ fun DependencyHandler.implementationInclude(spec: String, configure: ExternalMod
 /**
  * For fabric environments, both include a mod (in Jar-in-Jar), and expose as an api dependency
  */
+@Deprecated("Use nested dependency declarations instead, like `modApi(include(...)!!)`")
 fun <T : Dependency> DependencyHandler.apiInclude(dependency: T): T {
     add("modApi", dependency)
     add("include", dependency)
@@ -103,6 +115,7 @@ fun <T : Dependency> DependencyHandler.apiInclude(dependency: T): T {
 /**
  * For fabric environments, both include a mod (in Jar-in-Jar), and expose as an implementation dependency
  */
+@Deprecated("Use nested dependency declarations instead, like `modApi(include(...)!!)`")
 fun <T : Dependency> DependencyHandler.implementationInclude(dependency: T): T {
     add("modImplementation", dependency)
     add("include", dependency)
