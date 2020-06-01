@@ -86,12 +86,14 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                             listOf(
                                 "-Xlint:all",
                                 "-Xlint:-serial",  // ignore missing serialVersionUID
-                                "-Xlint:-processing", // don't warn when annotation processors aren't claimed
-                                "-Xdoclint", "-Xdoclint:-missing" // javadoc: warn about everything except missing comment
+                                "-Xlint:-processing" // don't warn when annotation processors aren't claimed
                             )
                         )
                         if (JavaVersion.toVersion(it.toolChain.version).isJava9Compatible) {
-                            compilerArgs.addAll(listOf("--release", extension.javaVersion.majorVersion))
+                            compilerArgs.addAll(listOf(
+                                "-Xdoclint", "-Xdoclint:-missing", // javadoc: warn about everything except missing comment (broken on JDK8)
+                                "--release", extension.javaVersion.majorVersion // enfore class availablity
+                            ))
                         }
                     }
                 }
