@@ -21,8 +21,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.tasks.SourceSetContainer
@@ -163,19 +161,6 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             }
         }
     }
-}
-
-@Deprecated(message = "Use nested dependencies", replaceWith = ReplaceWith("annotationProcessor(\"\$scope\"(spec, configure)!!)"))
-fun DependencyHandler.apAnd(scope: String, spec: String, configure: Dependency.() -> Unit = {}) = run {
-    add("annotationProcessor", spec)?.apply(configure)
-    add(scope, spec)?.apply(configure)
-}
-
-@Deprecated(message = "Use nested dependencies", replaceWith = ReplaceWith("annotationProcessor(\"\$scope\"(spec, configure)!!)"))
-@Suppress("UNCHECKED_CAST")
-fun <T : Dependency> DependencyHandler.apAnd(scope: String, spec: T, configure: T.() -> Unit = {}) = run {
-    add("annotationProcessor", spec)?.apply { configure(this as T) }
-    add(scope, spec)?.apply { configure(this as T) }
 }
 
 internal val JavaVersion.javaDocLinkUrl: String get() {

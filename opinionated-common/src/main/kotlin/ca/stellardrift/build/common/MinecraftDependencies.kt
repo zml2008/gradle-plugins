@@ -16,8 +16,6 @@
 
 package ca.stellardrift.build.common
 
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import java.net.URI
@@ -76,48 +74,3 @@ fun DependencyHandler.adventure(component: String, version: Any? = null): String
     return "net.kyori:adventure-$component${if (version == null) "" else ":$version"}"
 }
 
-/**
- * For fabric environments, both include a mod (in Jar-in-Jar), and expose as an api dependency
- */
-@Deprecated("Use nested dependency declarations instead, like `modApi(include(...)!!)`")
-fun DependencyHandler.apiInclude(spec: String, configure: ExternalModuleDependency.() -> Unit = {}) {
-    add("modApi", spec)?.apply {
-        (this as ExternalModuleDependency).apply(configure)
-    }
-    add("include", spec)?.apply {
-        (this as ExternalModuleDependency).apply(configure)
-    }
-}
-
-/**
- * For fabric environments, both include a mod (in Jar-in-Jar), and expose as an implementation dependency
- */
-@Deprecated("Use nested dependency declarations instead, like `modApi(include(...)!!)`")
-fun DependencyHandler.implementationInclude(spec: String, configure: ExternalModuleDependency.() -> Unit = {}) {
-    add("modImplementation", spec)?.apply {
-        (this as ExternalModuleDependency).apply(configure)
-    }
-    add("include", spec)?.apply {
-        (this as ExternalModuleDependency).apply(configure)
-    }
-}
-
-/**
- * For fabric environments, both include a mod (in Jar-in-Jar), and expose as an api dependency
- */
-@Deprecated("Use nested dependency declarations instead, like `modApi(include(...)!!)`")
-fun <T : Dependency> DependencyHandler.apiInclude(dependency: T): T {
-    add("modApi", dependency)
-    add("include", dependency)
-    return dependency
-}
-
-/**
- * For fabric environments, both include a mod (in Jar-in-Jar), and expose as an implementation dependency
- */
-@Deprecated("Use nested dependency declarations instead, like `modApi(include(...)!!)`")
-fun <T : Dependency> DependencyHandler.implementationInclude(dependency: T): T {
-    add("modImplementation", dependency)
-    add("include", dependency)
-    return dependency
-}

@@ -36,6 +36,7 @@ class OpinionatedKotlinDefaultsPlugin : Plugin<Project> {
             tasks.withType(KotlinCompile::class.java).configureEach {
                 it.kotlinOptions.freeCompilerArgs += listOf("-Xjvm-default=enable")
             }
+
             afterEvaluate {
                 tasks.withType(KotlinCompile::class.java).configureEach {
                     it.kotlinOptions.jvmTarget = stellardriftExtension.javaVersion.toString()
