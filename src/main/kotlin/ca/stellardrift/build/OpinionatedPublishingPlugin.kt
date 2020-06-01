@@ -103,13 +103,30 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
                 }
             }
 
+            val publishing = extensions.getByType(PublishingExtension::class.java)
+            extension.stagedRepositories.forEach {
+                val usernameProp = "${it.id}Username"
+                val passwordProp = "${it.id}Password"
+                if (project.hasProperty(usernameProp) && project.hasProperty(passwordProp)
+                    && (!it.snapshotsOnly || !project.version.toString().contains("-SNAPSHOT"))) {
+                    publishing.repositories.maven { repo ->
+                        repo.name = it.id
+                        repo.url = it.url
+                        repo.credentials { creds ->
+                            creds.username = project.property(usernameProp) as String
+                            creds.password = project.property(passwordProp) as String
+                        }
+                    }
+                }
+            }
+
         }
     }
 
     private fun configureMavenPublication(
-            project: Project,
-            extension: OpinionatedExtension,
-            publication: MavenPublication
+        project: Project,
+        extension: OpinionatedExtension,
+        publication: MavenPublication
     ) {
         extension.publication = publication
 
@@ -169,8 +186,8 @@ open class RequireClean : DefaultTask() {
 fun Project.isRelease(): Boolean {
     val tag = (grgit ?: return false).headTag()
 
-    return tag != null&&
-            !(version as String).contains("SNAPSHOT")
+    return tag != null &&
+        !(version as String).contains("SNAPSHOT")
 }
 
 private val Project.grgit get() = extensions.findByType(Grgit::class.java)
@@ -178,7 +195,7 @@ private val Project.grgit get() = extensions.findByType(Grgit::class.java)
 /**
  * Find a tag, if any, that corresponds with the current checked out commit
  */
-fun Grgit.headTag(): Tag?  {
+fun Grgit.headTag(): Tag? {
     val headCommit = head()
     return tag.list().find { it.commit == headCommit }
 }

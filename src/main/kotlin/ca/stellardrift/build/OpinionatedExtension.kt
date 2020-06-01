@@ -22,6 +22,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.publish.maven.MavenPublication
 import java.io.Serializable
+import java.net.URI
 import java.net.URL
 
 /**
@@ -69,6 +70,11 @@ data class GitlabOptions(
  */
 data class License(val name: String, val shortName: String, val url: URL) : Serializable
 
+/**
+ * A data class holding information on possible repositories
+ */
+internal data class PublishingSpec(val id: String, val url: URI, val snapshotsOnly: Boolean)
+
 open class OpinionatedExtension(objects: ObjectFactory) {
     /**
      * Applied to source compatibilty, target compatibilty, and Kotlin version
@@ -91,6 +97,8 @@ open class OpinionatedExtension(objects: ObjectFactory) {
      * If the publishing plugin is not applied, this will be null.
      */
     var publication: MavenPublication? internal set
+
+    internal val stagedRepositories = mutableListOf<PublishingSpec>()
 
     /**
      * A property that can automatically fill out pom options for common SCM systems.
@@ -169,6 +177,16 @@ open class OpinionatedExtension(objects: ObjectFactory) {
                         URL("https://www.gnu.org/licenses/agpl-3.0.html")
                 )
         )
+
+    /**
+     * Add the Maven repository at `url` to the list of repositories to publish to.
+     *
+     * The repository will only be registered if the appropriate `<repoId>Username`
+     * and `<repoId>Password` gradle properties are set.
+     */
+    fun publishTo(repoId: String, url: String, snapshotsOnly: Boolean = false) {
+        stagedRepositories.add(PublishingSpec(repoId, URI(url), snapshotsOnly))
+    }
     
     init {
         publication = null
