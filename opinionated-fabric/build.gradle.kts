@@ -7,11 +7,8 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":"))
+    implementation(project(":gradle-plugin-opinionated-common"))
     implementation("net.fabricmc:fabric-loom:0.2.7-SNAPSHOT")
-
-    testImplementation(kotlin("test"))
-    testImplementation(kotlin("test-junit"))
 }
 
 declarePlugin(

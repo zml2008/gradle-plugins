@@ -9,7 +9,8 @@
 
 rootProject.name = "gradle-plugins"
 
-listOf("opinionated-fabric").forEach {
+listOf("opinionated-common", "opinionated-fabric", "opinionated-kotlin",
+      "localization", "templating").forEach {
   include(":$it")
   findProject(":$it")?.name = "gradle-plugin-$it"
 }
