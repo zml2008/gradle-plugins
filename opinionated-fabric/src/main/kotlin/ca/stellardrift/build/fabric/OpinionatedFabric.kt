@@ -18,9 +18,13 @@ package ca.stellardrift.build.fabric
 
 import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.task.AbstractRunTask
+import net.fabricmc.loom.util.Constants
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.javadoc.Javadoc
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.jvm.tasks.Jar
 import java.util.Locale
 
@@ -66,6 +70,34 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         tasks.withType(AbstractRunTask::class.java).configureEach {
             it.dependsOn(testmodJar)
         }
+
+        afterEvaluate { proj ->
+            val depLinks = mutableListOf<String>()
+            proj.configurations.findByName(Constants.MAPPINGS)?.findDependencyVersion("net.fabricmc", "yarn")?.also {
+                depLinks += "https://maven.fabricmc.net/docs/yarn-$it"
+            }
+            proj.configurations.findByName(Constants.MOD_COMPILE_CLASSPATH)
+                ?.findDependencyVersion("net.fabricmc.fabric-api", "fabric-api")?.also {
+                    depLinks += "https://maven.fabricmc.net/docs/fabric-api-$it"
+                }
+
+            if (!depLinks.isEmpty()) {
+                proj.tasks.withType(Javadoc::class.java).configureEach { jd ->
+                    val options = jd.options
+                    if(options is StandardJavadocDocletOptions) {
+                        options.links?.addAll(depLinks)
+                    }
+                }
+            }
+        }
     }
 
+    internal fun Configuration.findDependencyVersion(group: String, name: String): String? {
+        allDependencies.forEach {
+            if (it.group == group && it.name == name && it.version != null) {
+                return it.version
+            }
+        }
+        return null
+    }
 }
