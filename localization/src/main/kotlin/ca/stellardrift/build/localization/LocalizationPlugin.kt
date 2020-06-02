@@ -17,6 +17,10 @@
 package ca.stellardrift.build.localization
 
 import groovy.text.StreamingTemplateEngine
+import java.io.FileReader
+import java.io.FileWriter
+import java.util.Locale
+import java.util.Properties
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -31,10 +35,6 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
-import java.io.FileReader
-import java.io.FileWriter
-import java.util.Locale
-import java.util.Properties
 
 const val MESSAGES_ROOT_NAME = "messages"
 
@@ -102,7 +102,6 @@ open class LocalizationGenerate : DefaultTask() {
             FileWriter(destinationPath).use { write ->
                 template.make(templateData).writeTo(write)
             }
-
         }
     }
 }
@@ -173,7 +172,6 @@ class LocalizationPlugin : Plugin<Project> {
                 }*/
                 it.resources.srcDir(task.map { t -> t.resourceBundleSources })
             }
-
         }
     }
 }

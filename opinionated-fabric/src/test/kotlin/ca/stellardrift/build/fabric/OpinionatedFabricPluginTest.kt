@@ -16,9 +16,9 @@
 
 package ca.stellardrift.build.fabric
 
-import org.gradle.testfixtures.ProjectBuilder
 import kotlin.test.Test
 import kotlin.test.assertNotNull
+import org.gradle.testfixtures.ProjectBuilder
 
 class OpinionatedFabricPluginTest {
     @Test

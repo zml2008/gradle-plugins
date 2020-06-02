@@ -16,9 +16,9 @@
 
 package ca.stellardrift.build.common
 
+import java.net.URI
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import java.net.URI
 
 fun RepositoryHandler.sponge() = maven {
     it.name = "sponge"
@@ -78,4 +78,3 @@ fun DependencyHandler.kyoriText(comp: String, version: Any): String {
 fun DependencyHandler.adventure(component: String, version: Any? = null): String {
     return "net.kyori:adventure-$component${if (version == null) "" else ":$version"}"
 }
-

@@ -18,6 +18,7 @@ package ca.stellardrift.build.common
 
 import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.BintrayPlugin
+import java.time.format.DateTimeFormatter
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.Tag
 import org.ajoberstar.grgit.gradle.GrgitPlugin
@@ -32,7 +33,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
-import java.time.format.DateTimeFormatter
 
 private val PUBLICATION_ID = "maven"
 private val DATE_FORMAT_BINTRAY = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -47,7 +47,6 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
         }
 
         val extension = getOrCreateOpinionatedExtension()
-
 
         val requireClean = project.tasks.register("requireClean", RequireClean::class.java)
         val publications = extensions.getByType(PublishingExtension::class.java).run {
@@ -67,7 +66,6 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
                 hasProperty("forceSign") || isRelease()
             }
         }
-
 
         val bintrayExtension = extensions.getByType(BintrayExtension::class.java).apply {
             user = findProperty("bintrayUser") as String? ?: System.getenv("BINTRAY_USER")
@@ -107,8 +105,8 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
             extension.stagedRepositories.forEach {
                 val usernameProp = "${it.id}Username"
                 val passwordProp = "${it.id}Password"
-                if (project.hasProperty(usernameProp) && project.hasProperty(passwordProp)
-                    && (!it.snapshotsOnly || !project.version.toString().contains("-SNAPSHOT"))) {
+                if (project.hasProperty(usernameProp) && project.hasProperty(passwordProp) &&
+                    (!it.snapshotsOnly || !project.version.toString().contains("-SNAPSHOT"))) {
                     publishing.repositories.maven { repo ->
                         repo.name = it.id
                         repo.url = it.url
@@ -119,7 +117,6 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
                     }
                 }
             }
-
         }
     }
 

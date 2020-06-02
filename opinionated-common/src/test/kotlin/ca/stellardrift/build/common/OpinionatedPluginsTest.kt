@@ -19,9 +19,9 @@
  */
 package ca.stellardrift.build.common
 
-import org.gradle.testfixtures.ProjectBuilder
 import kotlin.test.Test
 import kotlin.test.assertNotNull
+import org.gradle.testfixtures.ProjectBuilder
 
 /**
  * Basic tests to make sure each plugin applies properly

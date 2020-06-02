@@ -16,6 +16,7 @@
 
 package ca.stellardrift.build.fabric
 
+import java.util.Locale
 import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.task.AbstractRunTask
 import net.fabricmc.loom.util.Constants
@@ -26,7 +27,6 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.jvm.tasks.Jar
-import java.util.Locale
 
 private const val FABRIC_MOD_DESCRIPTOR = "fabric.mod.json"
 
@@ -84,7 +84,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             if (!depLinks.isEmpty()) {
                 proj.tasks.withType(Javadoc::class.java).configureEach { jd ->
                     val options = jd.options
-                    if(options is StandardJavadocDocletOptions) {
+                    if (options is StandardJavadocDocletOptions) {
                         options.links?.addAll(depLinks)
                         options.tags(listOf("reason:m:Reason for overwrite:")) // Add Mixin @reason JD tag definition
                     }

@@ -16,9 +16,9 @@
 
 package ca.stellardrift.build.localization
 
-import org.gradle.testfixtures.ProjectBuilder
 import kotlin.test.Test
 import kotlin.test.assertNotNull
+import org.gradle.testfixtures.ProjectBuilder
 
 class LocalizationPluginTest {
     @Test
@@ -31,5 +31,4 @@ class LocalizationPluginTest {
         // Verify the result
         assertNotNull(project.tasks.findByName("generateLocalization"))
     }
-
 }

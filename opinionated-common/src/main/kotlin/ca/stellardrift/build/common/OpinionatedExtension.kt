@@ -16,14 +16,14 @@
 
 package ca.stellardrift.build.common
 
+import java.io.Serializable
+import java.net.URI
+import java.net.URL
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.publish.maven.MavenPublication
-import java.io.Serializable
-import java.net.URI
-import java.net.URL
 
 /**
  * Options that configure how a SCM system is represented in a project's POM
@@ -187,7 +187,7 @@ open class OpinionatedExtension(objects: ObjectFactory) {
     fun publishTo(repoId: String, url: String, snapshotsOnly: Boolean = false) {
         stagedRepositories.add(PublishingSpec(repoId, URI(url), snapshotsOnly))
     }
-    
+
     init {
         publication = null
     }

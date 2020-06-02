@@ -21,4 +21,3 @@ declarePlugin(
       Requires the https://maven.fabricmc.net plugin repository to be declared
       """.trimIndent()
 )
-

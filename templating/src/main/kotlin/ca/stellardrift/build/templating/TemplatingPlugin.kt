@@ -48,7 +48,6 @@ open class GenerateTemplateTask : Copy() {
         hasProperties = true
         expand(properties)
     }
-
 }
 
 class TemplatingPlugin : Plugin<Project> {
@@ -86,7 +85,6 @@ class TemplatingPlugin : Plugin<Project> {
                     }
                 }
             }
-
         }
     }
 }

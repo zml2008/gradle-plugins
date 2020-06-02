@@ -31,7 +31,6 @@ import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 
-
 class OpinionatedDefaultsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
@@ -95,7 +94,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                         compilerArgs.addAll(
                             listOf(
                                 "-Xlint:all",
-                                "-Xlint:-serial",  // ignore missing serialVersionUID
+                                "-Xlint:-serial", // ignore missing serialVersionUID
                                 "-Xlint:-processing" // don't warn when annotation processors aren't claimed
                             )
                         )
@@ -131,7 +130,6 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                     it.isPreserveFileTimestamps = false
                     it.isReproducibleFileOrder = true
                 }
-
 
                 if (extension.automaticModuleNames) {
                     tasks.named("jar", Jar::class.java).configure {

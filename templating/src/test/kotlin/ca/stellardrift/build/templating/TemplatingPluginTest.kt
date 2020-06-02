@@ -16,9 +16,9 @@
 
 package ca.stellardrift.build.templating
 
-import org.gradle.testfixtures.ProjectBuilder
-import kotlin.test.assertNotNull
 import kotlin.test.Test
+import kotlin.test.assertNotNull
+import org.gradle.testfixtures.ProjectBuilder
 
 class TemplatingPluginTest {
     @Test
