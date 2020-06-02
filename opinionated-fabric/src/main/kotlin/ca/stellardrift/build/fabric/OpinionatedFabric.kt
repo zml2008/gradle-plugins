@@ -86,6 +86,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
                     val options = jd.options
                     if(options is StandardJavadocDocletOptions) {
                         options.links?.addAll(depLinks)
+                        options.tags(listOf("reason:m:Reason for overwrite:")) // Add Mixin @reason JD tag definition
                     }
                 }
             }
