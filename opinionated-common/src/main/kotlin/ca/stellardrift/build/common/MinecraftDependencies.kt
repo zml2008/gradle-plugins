@@ -22,7 +22,7 @@ import java.net.URI
 
 fun RepositoryHandler.sponge() = maven {
     it.name = "sponge"
-    it.url = URI("https://repo.spongepowered.org/maven")
+    it.url = URI("https://repo.spongepowered.org/maven/")
 }
 
 fun RepositoryHandler.sk89q() = maven {
@@ -32,19 +32,19 @@ fun RepositoryHandler.sk89q() = maven {
 
 fun RepositoryHandler.jitpack() = maven {
     it.name = "jitpack"
-    it.url = URI("https://jitpack.io")
+    it.url = URI("https://jitpack.io/")
 }
 
 fun RepositoryHandler.velocity() = velocitySnapshots()
 
 fun RepositoryHandler.velocitySnapshots() = maven {
     it.name = "velocity"
-    it.url = URI("https://repo.velocitypowered.com/snapshots")
+    it.url = URI("https://repo.velocitypowered.com/snapshots/")
 }
 
 fun RepositoryHandler.velocityReleases() = maven {
     it.name = "velocity"
-    it.url = URI("https://repo.velocitypowered.com/releases")
+    it.url = URI("https://repo.velocitypowered.com/releases/")
 }
 
 fun RepositoryHandler.spigot() = maven {
@@ -54,12 +54,17 @@ fun RepositoryHandler.spigot() = maven {
 
 fun RepositoryHandler.paper() = maven {
     it.name = "paper"
-    it.url = URI("https://papermc.io/repo/repository/maven-public")
+    it.url = URI("https://papermc.io/repo/repository/maven-public/")
 }
 
 fun RepositoryHandler.pex() = maven {
     it.name = "pex"
-    it.url = URI("https://repo.glaremasters.me/repository/permissionsex")
+    it.url = URI("https://repo.glaremasters.me/repository/permissionsex/")
+}
+
+fun RepositoryHandler.sonatypeOss() = maven {
+    it.name = "sonatype"
+    it.url = URI("https://oss.sonatype.org/content/groups/public/")
 }
 
 fun DependencyHandler.configurate(comp: String, version: Any? = null): String {
