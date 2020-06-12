@@ -19,7 +19,7 @@ repositories {
 opinionated {
     github("zml2008", "gradle-plugins")
     gpl3()
-    publication!!.apply {
+    publication?.apply {
         from(configurations["java"])
     }
 }
@@ -29,7 +29,7 @@ opinionated {
 
 Applies a few settings that are common across Java projects. Most are configurable through the `opinionated` extension.
 
-- Sets project groupId, version from the root project, and description
+- Sets project groupId, version, and description from the root project
 - Applies the licenser plugin, and if a `LICENSE_HEADER` file is present in the root project, configures all subprojects to use that file.
 - Limits licensing plugin to only java, kotlin, groovy, and scala files, and excludes files (such as generated sources) in the build directory
 - Automatically builds source and javadoc jars

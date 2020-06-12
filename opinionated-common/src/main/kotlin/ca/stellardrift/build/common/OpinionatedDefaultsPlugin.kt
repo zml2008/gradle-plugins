@@ -44,6 +44,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
 
             project.version = rootProject.version
             project.group = rootProject.group
+            project.description = rootProject.description
 
             extensions.findByType(LicenseExtension::class.java)?.apply {
                 exclude {
