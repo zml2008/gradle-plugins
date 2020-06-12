@@ -16,9 +16,9 @@
 
 package ca.stellardrift.build.common
 
-import java.net.URI
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
+import java.net.URI
 
 fun RepositoryHandler.sponge() = maven {
     it.name = "sponge"
@@ -40,11 +40,17 @@ fun RepositoryHandler.velocity() = velocitySnapshots()
 fun RepositoryHandler.velocitySnapshots() = maven {
     it.name = "velocity"
     it.url = URI("https://repo.velocitypowered.com/snapshots/")
+    it.mavenContent { maven ->
+        maven.snapshotsOnly()
+    }
 }
 
 fun RepositoryHandler.velocityReleases() = maven {
     it.name = "velocity"
     it.url = URI("https://repo.velocitypowered.com/releases/")
+    it.mavenContent { maven ->
+        maven.releasesOnly()
+    }
 }
 
 fun RepositoryHandler.spigot() = maven {
@@ -65,6 +71,9 @@ fun RepositoryHandler.pex() = maven {
 fun RepositoryHandler.sonatypeOss() = maven {
     it.name = "sonatype"
     it.url = URI("https://oss.sonatype.org/content/groups/public/")
+    it.mavenContent { maven ->
+        maven.snapshotsOnly()
+    }
 }
 
 fun DependencyHandler.configurate(comp: String, version: Any? = null): String {
