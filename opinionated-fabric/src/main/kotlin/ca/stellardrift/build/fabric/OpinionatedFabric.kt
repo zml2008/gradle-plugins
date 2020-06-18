@@ -16,7 +16,7 @@
 
 package ca.stellardrift.build.fabric
 
-import java.util.Locale
+import ca.stellardrift.build.common.getOrCreateOpinionatedExtension
 import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.task.AbstractRunTask
 import net.fabricmc.loom.util.Constants
@@ -27,6 +27,7 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.jvm.tasks.Jar
+import java.util.Locale
 
 private const val FABRIC_MOD_DESCRIPTOR = "fabric.mod.json"
 
@@ -89,6 +90,23 @@ class OpinionatedFabricPlugin : Plugin<Project> {
                         options.tags(listOf("reason:m:Reason for overwrite:")) // Add Mixin @reason JD tag definition
                     }
                 }
+            }
+
+            // Set up publishing to publish remapped, dev, sources, and JD jars
+            proj.getOrCreateOpinionatedExtension().publication?.apply {
+                val remapJar = proj.tasks.named("remapJar")
+                val remapSourcesJar = proj.tasks.named("remapSourcesJar")
+                suppressAllPomMetadataWarnings()
+
+                artifact(tasks.getByName("jar")) {
+                    it.classifier = "dev"
+                }
+                artifact(remapJar)
+
+                artifact(tasks.getByName("sourcesJar")) {
+                    it.builtBy(remapSourcesJar)
+                }
+                artifact(tasks.getByName("javadocJar"))
             }
         }
     }
