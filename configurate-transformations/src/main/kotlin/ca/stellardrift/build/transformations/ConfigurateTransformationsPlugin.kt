@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+@file:JvmName("ConfigurateTransformations")
 package ca.stellardrift.build.transformations
 
 import java.io.BufferedReader
@@ -26,7 +27,6 @@ import java.io.Writer
 import ninja.leaping.configurate.ConfigurationNode
 import ninja.leaping.configurate.gson.GsonConfigurationLoader
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader
-import ninja.leaping.configurate.loader.AbstractConfigurationLoader
 import ninja.leaping.configurate.xml.XMLConfigurationLoader
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader
 import org.gradle.api.Plugin
