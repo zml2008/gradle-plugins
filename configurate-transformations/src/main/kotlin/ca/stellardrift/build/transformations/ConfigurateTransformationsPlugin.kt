@@ -174,7 +174,7 @@ internal class ConfigurateFilterReader(private val originalIn: Reader) : FilterR
                     this._transformer(node)
                     val holder = TrustedByteArrayOutput()
                     this._dest.write(holder.writer(), node)
-                    this.`in` = ByteArrayInputStream(holder.rawArray).bufferedReader()
+                    this.`in` = ByteArrayInputStream(holder.rawArray, 0, holder.count).bufferedReader()
                 } catch (ex: IOException) {
                     this.cachedLoadError = ex
                 }
@@ -246,4 +246,6 @@ internal class ConfigurateFilterReader(private val originalIn: Reader) : FilterR
  */
 private class TrustedByteArrayOutput : ByteArrayOutputStream() {
     val rawArray: ByteArray get() = this.buf
+
+    val count: Int get() = super.count
 }
