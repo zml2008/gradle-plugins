@@ -17,6 +17,7 @@
 package ca.stellardrift.build.fabric
 
 import ca.stellardrift.build.common.getOrCreateOpinionatedExtension
+import java.util.Locale
 import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.task.AbstractRunTask
 import net.fabricmc.loom.util.Constants
@@ -27,7 +28,6 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.jvm.tasks.Jar
-import java.util.Locale
 
 private const val FABRIC_MOD_DESCRIPTOR = "fabric.mod.json"
 
@@ -52,7 +52,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             it.runtimeClasspath += mainSourceSet.get().runtimeClasspath
         }
 
-        dependencies.add("testmodCompile", mainSourceSet.get().output)
+        dependencies.add("testmodImplementation", mainSourceSet.get().output)
 
         val testmodJar = tasks.register("testmodJar", Jar::class.java) {
             it.archiveClassifier.set("testmod-dev")

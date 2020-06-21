@@ -16,9 +16,9 @@
 
 package ca.stellardrift.build.common
 
+import java.net.URI
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import java.net.URI
 
 fun RepositoryHandler.sponge() = maven {
     it.name = "sponge"
