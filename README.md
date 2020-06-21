@@ -99,6 +99,14 @@ Given GString templates in `src/<set>/templates`, source will be generated into 
 
 Tasks are named `generate[SourceSet]Templates`, and extend Copy for easy customization. Template properties may be provided using the `GenerateTemplateTask.properties()` method. If no properties are provided, the template context will contain one property, `project` set to the project object.
 
+## [Configurate Transformations](https://plugins.gradle.org/plugin/ca.stellardrift.configurate-transform)
+
+Use a Configurate loader to transform any resources in a copy task.
+
+The loader can both convert file formats, and load and modify configurations while keeping the same format. Use the `ContentFilterable.convertFormat` and `ContentFilterable.transform` extension functions to add filtering steps to any selection of copied files.
+
+The plugin ships with handling for all of Configurate's built-in formats, but any others can be added by implementing the `ConfigProcessor` interface.
+
 ## Minecraft Dependencies (not actually a plugin)
 
 These are just a series of Kotlin extension functions that allow easily declaring common dependencies in the Minecraft ecosystem
