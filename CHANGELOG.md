@@ -1,3 +1,13 @@
+# 3.1
+
+- configurate-transformations: New plugin that uses Configurate to transform files in any Copy-type task.
+- fabric: Create separate source sets for mixins and accessors
+- fabric: If publishing is present, automatically configure to publish fabric mod
+- fabric: Register Javadoc tag for Mixin `@Overwrite` reason
+- fabric: Bump to loom 0.4
+- opinionated: Add CottonMC repo to list
+- opinionated: Apply root project description to subprojects
+
 # 3.0
 
 - Divide plugins into submodules to reduce which dependencies need to be pulled in. **This will change artifact IDs and classes, so this is technically a breaking change.
