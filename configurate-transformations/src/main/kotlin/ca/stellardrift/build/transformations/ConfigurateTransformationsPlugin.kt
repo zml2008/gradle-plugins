@@ -22,6 +22,7 @@ import java.io.BufferedWriter
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.FilterReader
+import java.io.IOException
 import java.io.Reader
 import java.io.Writer
 import ninja.leaping.configurate.ConfigurationNode
@@ -32,7 +33,6 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.ContentFilterable
-import java.io.IOException
 
 class ConfigurateTransformationsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
