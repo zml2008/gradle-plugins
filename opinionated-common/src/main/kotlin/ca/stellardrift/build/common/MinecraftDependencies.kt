@@ -19,6 +19,7 @@ package ca.stellardrift.build.common
 import java.net.URI
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor
 
 fun RepositoryHandler.sponge() = maven {
     it.name = "sponge"
@@ -71,9 +72,13 @@ fun RepositoryHandler.pex() = maven {
 fun RepositoryHandler.sonatypeOss() = maven {
     it.name = "sonatype"
     it.url = URI("https://oss.sonatype.org/content/groups/public/")
-    it.mavenContent { maven ->
-        maven.snapshotsOnly()
-    }
+    it.mavenContent(MavenRepositoryContentDescriptor::snapshotsOnly)
+}
+
+fun RepositoryHandler.cottonMc() = maven {
+    it.name = "CottonMC"
+    it.url = URI("https://server.bbkr.space/artifactory/libs-release")
+    it.mavenContent(MavenRepositoryContentDescriptor::releasesOnly)
 }
 
 fun DependencyHandler.configurate(comp: String, version: Any? = null): String {
