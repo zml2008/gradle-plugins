@@ -62,17 +62,18 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             minecraft.addUnmappedMod(it.archiveFile.get().asFile.toPath())
         }
 
+        tasks.withType(AbstractRunTask::class.java).configureEach {
+            it.dependsOn(testmodJar)
+        }
+
         /*tasks.withType(ProcessResources::class.java).configureEach {
             it.filesMatching(FABRIC_MOD_DESCRIPTOR) { modJson -> // TODO: throws UnsupportedOperationException???
                 modJson.expand(mapOf("project" to it.project))
             }
         }*/
 
-        tasks.withType(AbstractRunTask::class.java).configureEach {
-            it.dependsOn(testmodJar)
-        }
-
         afterEvaluate { proj ->
+            // Automatically link to Fabric and Yarn JD
             val depLinks = mutableListOf<String>()
             proj.configurations.findByName(Constants.MAPPINGS)?.findDependencyVersion("net.fabricmc", "yarn")?.also {
                 depLinks += "https://maven.fabricmc.net/docs/yarn-$it"
