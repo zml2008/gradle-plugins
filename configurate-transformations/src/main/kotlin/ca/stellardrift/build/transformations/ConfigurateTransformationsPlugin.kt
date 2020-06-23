@@ -25,6 +25,7 @@ import java.io.FilterReader
 import java.io.IOException
 import java.io.Reader
 import java.io.Writer
+import java.nio.charset.StandardCharsets
 import ninja.leaping.configurate.ConfigurationNode
 import ninja.leaping.configurate.gson.GsonConfigurationLoader
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader
@@ -126,6 +127,13 @@ enum class ConfigFormats : ConfigProcessor {
 }
 
 /**
+ * Ensure that a configuration file can be successfully read by the specified format at build time
+ */
+fun ContentFilterable.validate(format: ConfigSource) {
+    this.filter(mapOf("format" to format), ConfigurateValidationReader::class.java)
+}
+
+/**
  * Convert any file targeted from the [source] format to the [dest] format.
  *
  * Conversion doesn't process file extensions, so most files will want to be renamed as part of the conversion process.
@@ -174,7 +182,7 @@ internal class ConfigurateFilterReader(private val originalIn: Reader) : FilterR
                     this._transformer(node)
                     val holder = TrustedByteArrayOutput()
                     this._dest.write(holder.writer(), node)
-                    this.`in` = ByteArrayInputStream(holder.rawArray, 0, holder.count).bufferedReader()
+                    this.`in` = holder.toInputStream().bufferedReader()
                 } catch (ex: IOException) {
                     this.cachedLoadError = ex
                 }
@@ -245,7 +253,25 @@ internal class ConfigurateFilterReader(private val originalIn: Reader) : FilterR
  * so we can use a [ByteArrayInputStream] without requiring a copy
  */
 private class TrustedByteArrayOutput : ByteArrayOutputStream() {
-    val rawArray: ByteArray get() = this.buf
+    fun toInputStream() = ByteArrayInputStream(this.buf, 0, count)
+}
 
-    val count: Int get() = super.count
+class ConfigurateValidationReader(private val original: Reader) : FilterReader(original) {
+    // when configured, read, validate, and set in to new ByteArrayStream
+    fun format(format: ConfigSource) {
+        val output = TrustedByteArrayOutput()
+        output.writer(StandardCharsets.UTF_8).use {
+            val buffer = CharArray(2048)
+            var read = original.read(buffer)
+            while (read != -1) {
+                it.write(buffer, 0, read)
+                read = original.read(buffer)
+            }
+        }
+        // Will throw exception on failure
+        format.read(output.toInputStream().reader())
+
+        // And go back to an input stream from the original
+        this.`in` = output.toInputStream().reader()
+    }
 }

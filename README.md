@@ -105,6 +105,8 @@ Use a Configurate loader to transform any resources in a copy task.
 
 The loader can both convert file formats, and load and modify configurations while keeping the same format. Use the `ContentFilterable.convertFormat` and `ContentFilterable.transform` extension functions to add filtering steps to any selection of copied files.
 
+Another mode is validation mode -- using the `ContentFilterable.validate` extension method, any matching files will be validated for any syntax errors. 
+
 The plugin ships with handling for all of Configurate's built-in formats, but any others can be added by implementing the `ConfigProcessor` interface.
 
 ## Minecraft Dependencies (not actually a plugin)
