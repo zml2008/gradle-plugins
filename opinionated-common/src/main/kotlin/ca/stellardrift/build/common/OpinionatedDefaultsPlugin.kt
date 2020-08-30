@@ -58,6 +58,9 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 }
             }
 
+            // add useful repos
+            registerExtensions(repositories)
+
             // Generate + use javadoc and sources jars
 
             val java = extensions.getByType(JavaPluginExtension::class.java).apply {
@@ -99,6 +102,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                                 "-Xlint:-processing" // don't warn when annotation processors aren't claimed
                             )
                         )
+                        it.toolChain
                         if (JavaVersion.toVersion(it.toolChain.version).isJava9Compatible) {
                             compilerArgs.addAll(listOf(
                                 "-Xdoclint", "-Xdoclint:-missing", // javadoc: warn about everything except missing comment (broken on JDK8)
