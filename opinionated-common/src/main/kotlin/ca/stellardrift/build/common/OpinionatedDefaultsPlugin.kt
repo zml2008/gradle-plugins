@@ -30,6 +30,11 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.findByType
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.withType
 
 class OpinionatedDefaultsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -46,7 +51,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             project.group = rootProject.group
             project.description = rootProject.description
 
-            extensions.findByType(LicenseExtension::class.java)?.apply {
+            extensions.findByType<LicenseExtension>()?.apply {
                 exclude {
                     it.file.startsWith(buildDir)
                 }
@@ -63,7 +68,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
 
             // Generate + use javadoc and sources jars
 
-            val java = extensions.getByType(JavaPluginExtension::class.java).apply {
+            val java = extensions.getByType<JavaPluginExtension>().apply {
                 withJavadocJar()
                 withSourcesJar()
             }
@@ -76,10 +81,10 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             val checkstyleDir = rootProject.projectDir.resolve("etc/checkstyle")
             if (checkstyleDir.isDirectory && checkstyleDir.resolve("checkstyle.xml").isFile) {
                 plugins.apply("checkstyle")
-                extensions.configure(CheckstyleExtension::class.java) {
-                    it.toolVersion = "8.32"
-                    it.configDirectory.set(checkstyleDir)
-                    it.configProperties = mapOf(
+                extensions.configure<CheckstyleExtension> {
+                    toolVersion = "8.32"
+                    configDirectory.set(checkstyleDir)
+                    configProperties = mapOf(
                         "severity" to "error"
                     )
                 }
@@ -92,7 +97,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 }
 
                 // Make sure we have a consistent encoding
-                tasks.withType(JavaCompile::class.java).configureEach {
+                tasks.withType<JavaCompile>().configureEach {
                     it.options.apply {
                         encoding = UTF_8
                         compilerArgs.addAll(
@@ -102,7 +107,6 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                                 "-Xlint:-processing" // don't warn when annotation processors aren't claimed
                             )
                         )
-                        it.toolChain
                         if (JavaVersion.toVersion(it.toolChain.version).isJava9Compatible) {
                             compilerArgs.addAll(listOf(
                                 "-Xdoclint", "-Xdoclint:-missing", // javadoc: warn about everything except missing comment (broken on JDK8)
@@ -112,7 +116,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                     }
                 }
 
-                tasks.withType(Javadoc::class.java).configureEach {
+                tasks.withType<Javadoc>().configureEach {
                     val options = it.options
                     val version = JavaVersion.toVersion(it.toolChain.version)
                     if (version == JavaVersion.VERSION_12) {
@@ -131,23 +135,23 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 }
 
                 // Make builds more reproducible
-                tasks.withType(AbstractArchiveTask::class.java).configureEach {
+                tasks.withType<AbstractArchiveTask>().configureEach {
                     it.isPreserveFileTimestamps = false
                     it.isReproducibleFileOrder = true
                 }
 
                 if (extension.automaticModuleNames) {
-                    tasks.named("jar", Jar::class.java).configure {
+                    tasks.named<Jar>("jar").configure {
                         it.manifest.attributes(mapOf("Automatic-Module-Name" to "$group.${name.replace("-", ".")}"))
                     }
                 }
 
                 if (extension.usesJUnit5) {
-                    tasks.withType(Test::class.java).configureEach {
+                    tasks.withType<Test>().configureEach {
                         it.useJUnitPlatform()
                     }
 
-                    extensions.getByType(SourceSetContainer::class.java).named("test").configure {
+                    extensions.getByType<SourceSetContainer>().named("test").configure {
                         dependencies.apply {
                             val junitVersion = findProperty(VERSION_JUNIT_PROPERTY) ?: VERSION_JUNIT_DEFAULT
                             add(

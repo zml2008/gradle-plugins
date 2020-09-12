@@ -18,6 +18,7 @@ subprojects {
 
     dependencies {
         "implementation"(kotlin("stdlib-jdk8"))
+        "implementation"(gradleKotlinDsl())
 
         "testImplementation"(kotlin("test"))
         "testImplementation"(kotlin("test-junit"))

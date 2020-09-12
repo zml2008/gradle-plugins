@@ -35,6 +35,10 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.register
 
 const val MESSAGES_ROOT_NAME = "messages"
 
@@ -116,17 +120,14 @@ open class LocalizationGenerate : DefaultTask() {
  */
 class LocalizationPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val extension = project.extensions.create("localization", LocalizationExtension::class.java)
+        val extension = project.extensions.create<LocalizationExtension>("localization")
         val parentTask = project.tasks.register("generateAllLocalizations")
 
-        val sSets = project.extensions.getByType(SourceSetContainer::class.java)
+        val sSets = project.extensions.getByType<SourceSetContainer>()
         sSets.configureEach {
             val messagesFileBasedir = project.file("src/${it.name}/$MESSAGES_ROOT_NAME")
             val outDir = project.layout.buildDirectory.dir("generated-src/${it.name}/$MESSAGES_ROOT_NAME")
-            val task = project.tasks.register(
-                it.getTaskName("generate", "Localization"),
-                LocalizationGenerate::class.java
-            ) { loc ->
+            val task = project.tasks.register<LocalizationGenerate>(it.getTaskName("generate", "Localization")).configure { loc ->
                 loc.resourceBundleSources.set(messagesFileBasedir)
                 loc.templateFile.set(extension.templateFile)
                 loc.generatedSourcesOut.set(outDir)
@@ -140,9 +141,7 @@ class LocalizationPlugin : Plugin<Project> {
         }
         project.afterEvaluate { _ ->
             sSets.configureEach {
-                val task = project.tasks.named(
-                    it.getTaskName("generate", "Localization"), LocalizationGenerate::class.java
-                )
+                val task = project.tasks.named<LocalizationGenerate>(it.getTaskName("generate", "Localization"))
 
                 // TODO: Kotlin-specific?
                 it.java.srcDir(task.map { t -> t.generatedSourcesOut })

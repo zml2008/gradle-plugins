@@ -22,6 +22,8 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.register
 
 internal val SOURCE_FILES = listOf("**/*.java", "**/*.kt", "**/*.groovy", "**/*.scala")
 
@@ -53,12 +55,12 @@ open class GenerateTemplateTask : Copy() {
 class TemplatingPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            extensions.getByType(SourceSetContainer::class.java).configureEach { src ->
+            extensions.getByType<SourceSetContainer>().configureEach { src ->
                     val taskName = src.getTaskName("generate", "Templates")
-                    val task = tasks.register(taskName, GenerateTemplateTask::class.java) {
+                    val task = tasks.register<GenerateTemplateTask>(taskName) {
                         val output = project.layout.buildDirectory.dir("generated-src/${src.name}/templates")
-                        it.includeRoot(file("src/${src.name}/templates"))
-                        it.into(output)
+                        includeRoot(file("src/${src.name}/templates"))
+                        into(output)
                     }
 
                     if (plugins.hasPlugin("kotlin")) { // we are using kotlin

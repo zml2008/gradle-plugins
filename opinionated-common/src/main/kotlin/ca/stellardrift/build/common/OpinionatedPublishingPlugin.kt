@@ -30,6 +30,10 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
@@ -39,35 +43,33 @@ private val DATE_FORMAT_BINTRAY = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:m
 
 class OpinionatedPublishingPlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {
-        plugins.apply {
-            apply(GrgitPlugin::class.java)
-            apply(BintrayPlugin::class.java)
-            apply(MavenPublishPlugin::class.java)
-            apply(SigningPlugin::class.java)
-        }
+        apply<GrgitPlugin>()
+        apply<BintrayPlugin>()
+        apply<MavenPublishPlugin>()
+        apply<SigningPlugin>()
 
         val extension = getOrCreateOpinionatedExtension()
 
-        val requireClean = project.tasks.register("requireClean", RequireClean::class.java)
-        val publications = extensions.getByType(PublishingExtension::class.java).run {
+        val requireClean = project.tasks.register<RequireClean>("requireClean")
+        val publications = extensions.getByType<PublishingExtension>().run {
             publications.register(PUBLICATION_ID, MavenPublication::class.java) {
                 configureMavenPublication(this@with, extension, it)
             }
             publications
         }
 
-        extensions.getByType(SigningExtension::class.java).apply {
+        extensions.getByType<SigningExtension>().apply {
             useGpgCmd()
             sign(publications)
         }
 
-        tasks.withType(Sign::class.java).configureEach {
+        tasks.withType<Sign>().configureEach {
             it.onlyIf {
                 hasProperty("forceSign") || isRelease()
             }
         }
 
-        val bintrayExtension = extensions.getByType(BintrayExtension::class.java).apply {
+        val bintrayExtension = extensions.getByType<BintrayExtension>().apply {
             user = findProperty("bintrayUser") as String? ?: System.getenv("BINTRAY_USER")
             key = findProperty("bintrayKey") as String? ?: System.getenv("BINTRAY_KEY")
             publish = true
@@ -101,7 +103,7 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
                 }
             }
 
-            val publishing = extensions.getByType(PublishingExtension::class.java)
+            val publishing = extensions.getByType<PublishingExtension>()
             extension.stagedRepositories.forEach {
                 val usernameProp = "${it.id}Username"
                 val passwordProp = "${it.id}Password"

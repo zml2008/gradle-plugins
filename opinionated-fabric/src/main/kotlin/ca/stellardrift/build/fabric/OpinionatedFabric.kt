@@ -31,6 +31,12 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.withType
 
 private const val FABRIC_MOD_DESCRIPTOR = "fabric.mod.json"
 private const val TESTMOD_SOURCE_SET = "testmod"
@@ -38,18 +44,16 @@ internal val MIXIN_AP_ARGS = setOf("outRefMapFile", "defaultObfuscationEnv", "ou
 
 class OpinionatedFabricPlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {
-        plugins.apply {
-            apply("ca.stellardrift.opinionated")
-            apply("fabric-loom")
-        }
+        apply(plugin = "ca.stellardrift.opinionated")
+        apply(plugin = "fabric-loom")
 
-        val minecraft = extensions.getByType(LoomGradleExtension::class.java)
+        val minecraft = extensions.getByType<LoomGradleExtension>()
 
         // Set up refmap
         minecraft.refmapName = "${project.name.toLowerCase(Locale.ROOT)}-refmap.json"
 
         // Testmod configuration
-        val sourceSets = project.extensions.getByType(SourceSetContainer::class.java)
+        val sourceSets = project.extensions.getByType<SourceSetContainer>()
         val mainSourceSet = sourceSets.named("main")
 
         val testModSet = sourceSets.register(TESTMOD_SOURCE_SET) {
@@ -58,7 +62,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             dependencies.add(it.implementationConfigurationName, mainSourceSet.get().output)
         }
 
-        val testModJar = tasks.register(testModSet.get().jarTaskName, Jar::class.java) {
+        val testModJar = tasks.register<Jar>(testModSet.get().jarTaskName).configure {
             it.archiveClassifier.set("$TESTMOD_SOURCE_SET-dev")
             it.group = "build"
 
@@ -66,7 +70,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             minecraft.unmappedModCollection.from(it.archiveFile.get().asFile.toPath())
         }
 
-        tasks.withType(AbstractRunTask::class.java).configureEach {
+        tasks.withType<AbstractRunTask>().configureEach {
             it.dependsOn(testModJar)
         }
 
@@ -93,7 +97,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
                 }
 
             if (!depLinks.isEmpty()) {
-                proj.tasks.withType(Javadoc::class.java).configureEach { jd ->
+                proj.tasks.withType<Javadoc>().configureEach { jd ->
                     val options = jd.options
                     if (options is StandardJavadocDocletOptions) {
                         options.links?.addAll(depLinks)
@@ -104,19 +108,19 @@ class OpinionatedFabricPlugin : Plugin<Project> {
 
             // Set up publishing to publish remapped, dev, sources, and JD jars
             proj.getOrCreateOpinionatedExtension().publication?.apply {
-                val remapJar = proj.tasks.getByName("remapJar")
-                val remapSourcesJar = proj.tasks.getByName("remapSourcesJar")
+                val remapJar = tasks["remapJar"]
+                val remapSourcesJar = tasks["remapSourcesJar"]
                 suppressAllPomMetadataWarnings()
 
-                artifact(tasks.getByName(mainSourceSet.get().jarTaskName)) {
+                artifact(tasks[mainSourceSet.get().jarTaskName]) {
                     it.classifier = "dev"
                 }
                 artifact(remapJar)
 
-                artifact(tasks.getByName(mainSourceSet.get().sourcesJarTaskName)) {
+                artifact(tasks[mainSourceSet.get().sourcesJarTaskName]) {
                     it.builtBy(remapSourcesJar)
                 }
-                artifact(tasks.getByName(mainSourceSet.get().javadocJarTaskName))
+                artifact(tasks[mainSourceSet.get().javadocJarTaskName])
             }
         }
     }
@@ -141,7 +145,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
      *   Classes in the `mixin` sourceSet won't be visible to the rest of the project.
      */
     private fun applyMixinSourceSets(project: Project, base: SourceSet) {
-        val sourceSets = project.extensions.getByType(SourceSetContainer::class.java)
+        val sourceSets = project.extensions.getByType<SourceSetContainer>()
 
         // Accessor
         // can see minecraft + its dependencies
@@ -166,12 +170,12 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         val refmapArgName = "-AoutRefMapFile"
         project.afterEvaluate {
             // configure refmap
-            it.tasks.named(accessor.get().compileJavaTaskName, JavaCompile::class.java).configure { c ->
+            it.tasks.named<JavaCompile>(accessor.get().compileJavaTaskName).configure { c ->
                 c.options.compilerArgs.removeIf { arg -> arg.startsWith(refmapArgName) }
                 c.options.compilerArgs.add("$refmapArgName=${c.destinationDir}/${project.name.toLowerCase()}-${accessor.get().name}-refmap.json")
             }
             // And remove Mixin AP parameters from the main source set
-            it.tasks.named(base.compileJavaTaskName, JavaCompile::class.java).configure { c ->
+            it.tasks.named<JavaCompile>(base.compileJavaTaskName).configure { c ->
                 c.options.compilerArgs.removeIf { arg -> MIXIN_AP_ARGS.any { mixin -> arg.contains(mixin) } }
             }
         }
@@ -184,7 +188,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
 
         // Add source sets to jars
         try {
-            project.tasks.named(base.jarTaskName, Jar::class.java).configure {
+            project.tasks.named<Jar>(base.jarTaskName).configure {
                 it.from(accessor.get().output)
                 it.from(mixin.get().output)
             }
@@ -193,7 +197,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         }
 
         try {
-            project.tasks.named(base.sourcesJarTaskName, Jar::class.java).configure {
+            project.tasks.named<Jar>(base.sourcesJarTaskName).configure {
                 accessor.get().allJava.forEach { f ->
                     if (f.exists()) {
                         it.from(f)
