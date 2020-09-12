@@ -8,7 +8,7 @@ repositories {
 
 dependencies {
     implementation(project(":gradle-plugin-opinionated-common"))
-    implementation("net.fabricmc:fabric-loom:0.4-SNAPSHOT")
+    implementation("net.fabricmc:fabric-loom:0.5-SNAPSHOT")
 }
 
 declarePlugin(

@@ -63,7 +63,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             it.group = "build"
 
             it.from(testModSet.get().output)
-            minecraft.addUnmappedMod(it.archiveFile.get().asFile.toPath())
+            minecraft.unmappedModCollection.from(it.archiveFile.get().asFile.toPath())
         }
 
         tasks.withType(AbstractRunTask::class.java).configureEach {
@@ -194,8 +194,17 @@ class OpinionatedFabricPlugin : Plugin<Project> {
 
         try {
             project.tasks.named(base.sourcesJarTaskName, Jar::class.java).configure {
-                it.from(accessor.get().allJava)
-                it.from(mixin.get().allJava)
+                accessor.get().allJava.forEach { f ->
+                    if (f.exists()) {
+                        it.from(f)
+                    }
+                }
+
+                mixin.get().allJava.forEach { f ->
+                    if (f.exists()) {
+                        it.from(f)
+                    }
+                }
             }
         } catch (_: UnknownTaskException) {
             // ignore, don't need to configure a task that doesn't exist
