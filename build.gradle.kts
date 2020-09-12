@@ -3,7 +3,7 @@ import com.gradle.publish.PluginBundleExtension
 plugins {
     kotlin("jvm") version "1.3.72" apply false // we must override what we're providing ourself... whoo circular dependencies
 
-    id("ca.stellardrift.opinionated.kotlin") version "3.0" apply false
+    id("ca.stellardrift.opinionated.kotlin") version "3.1" apply false
     id("com.github.ben-manes.versions") version "0.28.0"
 }
 

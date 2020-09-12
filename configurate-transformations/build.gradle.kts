@@ -1,10 +1,5 @@
 import ca.stellardrift.build.common.configurate
-import ca.stellardrift.build.common.pex
 import ca.stellardrift.build.self.declarePlugin
-
-repositories {
-    pex()
-}
 
 dependencies {
     api(platform(configurate("bom", "3.7")))
