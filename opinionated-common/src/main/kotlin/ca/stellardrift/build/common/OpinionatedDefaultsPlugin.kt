@@ -30,6 +30,7 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.getByType
@@ -80,7 +81,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
 
             val checkstyleDir = rootProject.projectDir.resolve("etc/checkstyle")
             if (checkstyleDir.isDirectory && checkstyleDir.resolve("checkstyle.xml").isFile) {
-                plugins.apply("checkstyle")
+                apply(plugin = "checkstyle")
                 extensions.configure<CheckstyleExtension> {
                     toolVersion = "8.32"
                     configDirectory.set(checkstyleDir)
@@ -100,6 +101,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 tasks.withType<JavaCompile>().configureEach {
                     it.options.apply {
                         encoding = UTF_8
+                        release.set(extension.javaVersion.ordinal + 1)
                         compilerArgs.addAll(
                             listOf(
                                 "-Xlint:all",
@@ -109,8 +111,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                         )
                         if (JavaVersion.toVersion(it.toolChain.version).isJava9Compatible) {
                             compilerArgs.addAll(listOf(
-                                "-Xdoclint", "-Xdoclint:-missing", // javadoc: warn about everything except missing comment (broken on JDK8)
-                                "--release", extension.javaVersion.majorVersion // enfore class availablity
+                                "-Xdoclint", "-Xdoclint:-missing" // javadoc: warn about everything except missing comment (broken on JDK8)
                             ))
                         }
                     }

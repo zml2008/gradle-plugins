@@ -26,11 +26,13 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.credentials.PasswordCredentials
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.credentials
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
@@ -105,17 +107,11 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
 
             val publishing = extensions.getByType<PublishingExtension>()
             extension.stagedRepositories.forEach {
-                val usernameProp = "${it.id}Username"
-                val passwordProp = "${it.id}Password"
-                if (project.hasProperty(usernameProp) && project.hasProperty(passwordProp) &&
-                    (!it.snapshotsOnly || !project.version.toString().contains("-SNAPSHOT"))) {
+                if (!it.snapshotsOnly || !project.version.toString().contains("-SNAPSHOT")) {
                     publishing.repositories.maven { repo ->
                         repo.name = it.id
                         repo.url = it.url
-                        repo.credentials { creds ->
-                            creds.username = project.property(usernameProp) as String
-                            creds.password = project.property(passwordProp) as String
-                        }
+                        repo.credentials(PasswordCredentials::class)
                     }
                 }
             }
