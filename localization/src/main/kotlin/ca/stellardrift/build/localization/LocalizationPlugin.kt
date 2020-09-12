@@ -21,16 +21,17 @@ import java.io.FileReader
 import java.io.FileWriter
 import java.util.Locale
 import java.util.Properties
+import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.SourceSetContainer
@@ -46,29 +47,31 @@ enum class TemplateType(val extension: String) {
     JAVA("java"), KOTLIN("kt"), OTHER("fixme")
 }
 
-open class LocalizationExtension(objects: ObjectFactory) {
+open class LocalizationExtension @Inject constructor(objects: ObjectFactory) {
     val templateFile: RegularFileProperty = objects.fileProperty()
     val templateType: Property<TemplateType> = objects.property(TemplateType::class.java).convention(TemplateType.KOTLIN)
 }
 
-open class LocalizationGenerate : DefaultTask() {
+abstract class LocalizationGenerate : DefaultTask() {
     private val templateEngine = StreamingTemplateEngine()
 
-    @InputDirectory
-    @SkipWhenEmpty
-    val resourceBundleSources = project.objects.directoryProperty()
+    @get:Inject
+    abstract val objectFactory: ObjectFactory
 
-    @Internal
-    val tree = project.objects.fileTree().from(resourceBundleSources)
+    @get:InputDirectory
+    @get:SkipWhenEmpty
+    abstract val resourceBundleSources: DirectoryProperty
 
-    @InputFile
-    val templateFile = project.objects.fileProperty()
+    private val tree = objectFactory.fileTree().from(resourceBundleSources)
 
-    @Input
-    val templateType = project.objects.property(TemplateType::class.java)
+    @get:InputFile
+    abstract val templateFile: RegularFileProperty
 
-    @OutputDirectory
-    val generatedSourcesOut = project.objects.directoryProperty()
+    @get:Input
+    abstract val templateType: Property<TemplateType>
+
+    @get:OutputDirectory
+    abstract val generatedSourcesOut: DirectoryProperty
 
     init {
         tree.include("**/*.properties")
@@ -119,11 +122,11 @@ open class LocalizationGenerate : DefaultTask() {
  * This becomes another resource root. In addition
  */
 class LocalizationPlugin : Plugin<Project> {
-    override fun apply(project: Project) {
-        val extension = project.extensions.create<LocalizationExtension>("localization")
-        val parentTask = project.tasks.register("generateAllLocalizations")
+    override fun apply(project: Project) = with(project) {
+        val extension = extensions.create<LocalizationExtension>("localization")
+        val parentTask = tasks.register("generateAllLocalizations")
 
-        val sSets = project.extensions.getByType<SourceSetContainer>()
+        val sSets = extensions.getByType<SourceSetContainer>()
         sSets.configureEach {
             val messagesFileBasedir = project.file("src/${it.name}/$MESSAGES_ROOT_NAME")
             val outDir = project.layout.buildDirectory.dir("generated-src/${it.name}/$MESSAGES_ROOT_NAME")
@@ -139,7 +142,7 @@ class LocalizationPlugin : Plugin<Project> {
 
             it.resources.srcDir(messagesFileBasedir)
         }
-        project.afterEvaluate { _ ->
+        afterEvaluate { _ ->
             sSets.configureEach {
                 val task = project.tasks.named<LocalizationGenerate>(it.getTaskName("generate", "Localization"))
 
