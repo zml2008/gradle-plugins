@@ -16,6 +16,7 @@
 
 package ca.stellardrift.build.common
 
+import java.util.Locale
 import net.minecrell.gradle.licenser.LicenseExtension
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
@@ -143,7 +144,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
 
                 if (extension.automaticModuleNames) {
                     tasks.named<Jar>("jar").configure {
-                        it.manifest.attributes(mapOf("Automatic-Module-Name" to "$group.${name.replace("-", ".")}"))
+                        it.manifest.attributes(mapOf("Automatic-Module-Name" to "$group.${name.replace("-", ".").toLowerCase(Locale.ROOT)}"))
                     }
                 }
 

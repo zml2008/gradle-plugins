@@ -130,6 +130,7 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
                 name.set(project.name)
                 description.set(project.description)
                 url.set(extension.scm.map { it.website })
+                artifactId.set(project.name.toLowerCase())
 
                 scm { p ->
                     p.connection.set(extension.scm.map { it.connection })
