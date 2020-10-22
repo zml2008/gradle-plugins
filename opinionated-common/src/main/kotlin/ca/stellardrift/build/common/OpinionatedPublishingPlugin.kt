@@ -126,11 +126,12 @@ class OpinionatedPublishingPlugin : Plugin<Project> {
         extension.publication = publication
 
         publication.apply {
+            artifactId = project.name.toLowerCase()
+
             pom.apply {
                 name.set(project.name)
                 description.set(project.description)
                 url.set(extension.scm.map { it.website })
-                artifactId.set(project.name.toLowerCase())
 
                 scm { p ->
                     p.connection.set(extension.scm.map { it.connection })

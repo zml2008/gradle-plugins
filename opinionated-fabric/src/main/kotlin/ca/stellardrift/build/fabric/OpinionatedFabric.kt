@@ -19,7 +19,6 @@ package ca.stellardrift.build.fabric
 import ca.stellardrift.build.common.getOrCreateOpinionatedExtension
 import java.util.Locale
 import net.fabricmc.loom.LoomGradleExtension
-import net.fabricmc.loom.task.AbstractRunTask
 import net.fabricmc.loom.util.Constants
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -46,6 +45,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {
         apply(plugin = "ca.stellardrift.opinionated")
         apply(plugin = "fabric-loom")
+        apply(plugin = "com.github.fudge.forgedflowerloom")
 
         val minecraft = extensions.getByType<LoomGradleExtension>()
 
@@ -67,12 +67,8 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             it.group = "build"
 
             it.from(testModSet.get().output)
-            minecraft.unmappedModCollection.from(it.archiveFile.get().asFile.toPath())
         }
-
-        tasks.withType<AbstractRunTask>().configureEach {
-            it.dependsOn(testModJar)
-        }
+        minecraft.unmappedModCollection.from(testModJar)
 
         applyMixinSourceSets(this, testModSet.get())
 
@@ -88,10 +84,10 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         afterEvaluate { proj ->
             // Automatically link to Fabric and Yarn JD
             val depLinks = mutableListOf<String>()
-            proj.configurations.findByName(Constants.MAPPINGS)?.findDependencyVersion("net.fabricmc", "yarn")?.also {
+            proj.configurations.findByName(Constants.Configurations.MAPPINGS)?.findDependencyVersion("net.fabricmc", "yarn")?.also {
                 depLinks += "https://maven.fabricmc.net/docs/yarn-$it"
             }
-            proj.configurations.findByName(Constants.MOD_COMPILE_CLASSPATH)
+            proj.configurations.findByName(Constants.Configurations.MOD_COMPILE_CLASSPATH)
                 ?.findDependencyVersion("net.fabricmc.fabric-api", "fabric-api")?.also {
                     depLinks += "https://maven.fabricmc.net/docs/fabric-api-$it"
                 }
@@ -152,7 +148,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         // can be seen by project
         val accessor = sourceSets.register(base.getTaskName(null, "accessor")) {
             project.configurations.named(it.implementationConfigurationName).configure { c ->
-                c.extendsFrom(project.configurations.named(Constants.MINECRAFT_NAMED).get())
+                c.extendsFrom(project.configurations.named(Constants.Configurations.MINECRAFT_NAMED).get())
             }
             project.dependencies.add(base.implementationConfigurationName, it.output)
         }

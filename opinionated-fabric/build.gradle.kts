@@ -9,6 +9,7 @@ repositories {
 dependencies {
     implementation(project(":gradle-plugin-opinionated-common"))
     implementation("net.fabricmc:fabric-loom:0.5-SNAPSHOT")
+    implementation("io.github.fudge:forgedflowerloom:2.0.0")
 }
 
 declarePlugin(
