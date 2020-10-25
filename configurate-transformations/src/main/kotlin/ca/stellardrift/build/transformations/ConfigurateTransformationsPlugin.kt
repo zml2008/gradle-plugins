@@ -26,19 +26,21 @@ import java.io.IOException
 import java.io.Reader
 import java.io.Writer
 import java.nio.charset.StandardCharsets
-import ninja.leaping.configurate.ConfigurationNode
-import ninja.leaping.configurate.gson.GsonConfigurationLoader
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader
-import ninja.leaping.configurate.xml.XMLConfigurationLoader
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.ContentFilterable
+import org.gradle.kotlin.dsl.invoke
+import org.spongepowered.configurate.ConfigurationNode
+import org.spongepowered.configurate.gson.GsonConfigurationLoader
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader
+import org.spongepowered.configurate.loader.AbstractConfigurationLoader
+import org.spongepowered.configurate.xml.XmlConfigurationLoader
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 
 class ConfigurateTransformationsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        // we mostly exist for adding to the project namespace, no need to apply anything really
-        // maybe a project extension?
+        // TODO: Figure out how to register our extension functions for Groovy classes
     }
 }
 
@@ -61,68 +63,24 @@ interface ConfigTarget {
  */
 interface ConfigProcessor : ConfigSource, ConfigTarget
 
-// TODO: For configurate 4.0, the AbstractConfigurationLoader.Builder class will
-//  be public so users can customize loader options
-enum class ConfigFormats : ConfigProcessor {
-    HOCON {
-        override fun read(source: Reader): ConfigurationNode {
-            val loader = HoconConfigurationLoader.builder()
-                .setSource { BufferedReader(source) }
-                .build()
-            return loader.load()
-        }
+enum class ConfigFormats(private val maker: () -> AbstractConfigurationLoader.Builder<*, *>) : ConfigProcessor {
+    HOCON(HoconConfigurationLoader::builder),
+    GSON(GsonConfigurationLoader::builder),
+    YAML(YamlConfigurationLoader::builder),
+    XML(XmlConfigurationLoader::builder);
 
-        override fun write(destination: Writer, node: ConfigurationNode) {
-            val loader = HoconConfigurationLoader.builder()
-                .setSink { BufferedWriter(destination) }
+    override fun read(source: Reader): ConfigurationNode {
+        val loader = this.maker()
+                .source { BufferedReader(source) }
                 .build()
-            loader.save(node)
-        }
-    },
-    GSON {
-        override fun read(source: Reader): ConfigurationNode {
-            val loader = GsonConfigurationLoader.builder()
-                .setSource { BufferedReader(source) }
-                .build()
-            return loader.load()
-        }
+        return loader.load()
+    }
 
-        override fun write(destination: Writer, node: ConfigurationNode) {
-            val loader = GsonConfigurationLoader.builder()
-                .setSink { BufferedWriter(destination) }
+    override fun write(destination: Writer, node: ConfigurationNode) {
+        val loader = this.maker()
+                .sink { BufferedWriter(destination) }
                 .build()
-            loader.save(node)
-        }
-    },
-    YAML {
-        override fun read(source: Reader): ConfigurationNode {
-            val loader = YAMLConfigurationLoader.builder()
-                .setSource { BufferedReader(source) }
-                .build()
-            return loader.load()
-        }
-
-        override fun write(destination: Writer, node: ConfigurationNode) {
-            val loader = YAMLConfigurationLoader.builder()
-                .setSink { BufferedWriter(destination) }
-                .build()
-            loader.save(node)
-        }
-    },
-    XML {
-        override fun read(source: Reader): ConfigurationNode {
-            val loader = XMLConfigurationLoader.builder()
-                .setSource { BufferedReader(source) }
-                .build()
-            return loader.load()
-        }
-
-        override fun write(destination: Writer, node: ConfigurationNode) {
-            val loader = XMLConfigurationLoader.builder()
-                .setSink { BufferedWriter(destination) }
-                .build()
-            loader.save(node)
-        }
+        loader.save(node)
     }
 }
 
@@ -138,14 +96,15 @@ fun ContentFilterable.validate(format: ConfigSource) {
  *
  * Conversion doesn't process file extensions, so most files will want to be renamed as part of the conversion process.
  */
-fun ContentFilterable.convertFormat(source: ConfigSource, dest: ConfigTarget, transformer: (ConfigurationNode) -> Unit = {}) {
+@JvmOverloads
+fun ContentFilterable.convertFormat(source: ConfigSource, dest: ConfigTarget, transformer: Action<ConfigurationNode>? = null) {
     this.filter(mapOf("source" to source, "dest" to dest, "transformer" to transformer), ConfigurateFilterReader::class.java)
 }
 
 /**
  * Load every file to be processed
  */
-fun ContentFilterable.transform(configType: ConfigProcessor, transformer: (ConfigurationNode) -> Unit) {
+fun ContentFilterable.transform(configType: ConfigProcessor, transformer: Action<ConfigurationNode>) {
     this.filter(mapOf("source" to configType, "dest" to configType, "transformer" to transformer), ConfigurateFilterReader::class.java)
 }
 
@@ -154,7 +113,7 @@ internal class ConfigurateFilterReader(private val originalIn: Reader) : FilterR
     // This isn't super efficient, but it's a start
     private lateinit var _source: ConfigSource
     private lateinit var _dest: ConfigTarget
-    private lateinit var _transformer: (ConfigurationNode) -> Unit
+    private var _transformer: Action<ConfigurationNode>? = null
     private var setUp = false
     private var cachedLoadError: IOException? = null
 
@@ -168,18 +127,18 @@ internal class ConfigurateFilterReader(private val originalIn: Reader) : FilterR
         trySetUp()
     }
 
-    fun transformer(func: (ConfigurationNode) -> Unit) {
+    fun transformer(func: Action<ConfigurationNode>?) {
         this._transformer = func
         trySetUp()
     }
 
     private fun trySetUp() {
         if (!this.setUp) { // only do it once
-            if (this::_source.isInitialized && this::_dest.isInitialized && this::_transformer.isInitialized) { // let's go!
+            if (this::_source.isInitialized && this::_dest.isInitialized) { // let's go!
                 this.setUp = true
                 try {
                     val node = this._source.read(this.`in`)
-                    this._transformer(node)
+                    this._transformer?.invoke(node)
                     val holder = TrustedByteArrayOutput()
                     this._dest.write(holder.writer(), node)
                     this.`in` = holder.toInputStream().bufferedReader()

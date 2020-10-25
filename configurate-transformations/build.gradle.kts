@@ -1,13 +1,18 @@
 import ca.stellardrift.build.common.configurate
+import ca.stellardrift.build.common.sonatypeOss
 import ca.stellardrift.build.self.declarePlugin
 
+repositories {
+    sonatypeOss()
+}
+
 dependencies {
-    api(platform(configurate("bom", "3.7")))
-    implementation(configurate("ext-kotlin"))
-    implementation(configurate("hocon"))
-    implementation(configurate("yaml"))
-    implementation(configurate("gson"))
-    implementation(configurate("xml"))
+    api(platform(configurate("bom", "4.0.0-SNAPSHOT")))
+    api(configurate("extra-kotlin"))
+    api(configurate("hocon"))
+    api(configurate("yaml"))
+    api(configurate("gson"))
+    api(configurate("xml"))
 }
 
 declarePlugin(
