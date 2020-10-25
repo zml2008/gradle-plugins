@@ -16,10 +16,11 @@
 
 package ca.stellardrift.build.fabric
 
-import ca.stellardrift.build.common.getOrCreateOpinionatedExtension
 import java.util.Locale
 import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.util.Constants
+import net.kyori.indra.extension as indraExtension
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.UnknownTaskException
@@ -103,25 +104,27 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             }
 
             // Set up publishing to publish remapped, dev, sources, and JD jars
-            proj.getOrCreateOpinionatedExtension().publication?.apply {
+            // TODO: The main indra plugin sets up publication using the `java` software component, but this is wrong
+            // (because loom is bad)
+            indraExtension(proj).configurePublications(Action {
                 val remapJar = tasks["remapJar"]
                 val remapSourcesJar = tasks["remapSourcesJar"]
-                suppressAllPomMetadataWarnings()
+                it.suppressAllPomMetadataWarnings()
 
-                artifact(tasks[mainSourceSet.get().jarTaskName]) {
-                    it.classifier = "dev"
+                it.artifact(tasks[mainSourceSet.get().jarTaskName]) { a ->
+                    a.classifier = "dev"
                 }
-                artifact(remapJar)
+                it.artifact(remapJar)
 
-                artifact(tasks[mainSourceSet.get().sourcesJarTaskName]) {
-                    it.builtBy(remapSourcesJar)
+                it.artifact(tasks[mainSourceSet.get().sourcesJarTaskName]) { a ->
+                    a.builtBy(remapSourcesJar)
                 }
-                artifact(tasks[mainSourceSet.get().javadocJarTaskName])
-            }
+                it.artifact(tasks[mainSourceSet.get().javadocJarTaskName])
+            })
         }
     }
 
-    internal fun Configuration.findDependencyVersion(group: String, name: String): String? {
+    private fun Configuration.findDependencyVersion(group: String, name: String): String? {
         allDependencies.forEach {
             if (it.group == group && it.name == name && it.version != null) {
                 return it.version

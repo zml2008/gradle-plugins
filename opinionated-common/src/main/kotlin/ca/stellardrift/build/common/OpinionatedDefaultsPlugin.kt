@@ -17,26 +17,20 @@
 package ca.stellardrift.build.common
 
 import java.util.Locale
-import net.minecrell.gradle.licenser.LicenseExtension
+import net.kyori.indra.registerRepositoryExtensions
+import org.cadixdev.gradle.licenser.LicenseExtension
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.plugins.quality.CheckstyleExtension
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
-import org.gradle.api.tasks.testing.Test
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
-import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
+import org.gradle.plugins.signing.Sign
 
 class OpinionatedDefaultsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -44,138 +38,55 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             val extension = getOrCreateOpinionatedExtension()
 
             plugins.apply {
-                apply("net.minecrell.licenser")
-                apply("java-library")
+                apply("net.kyori.indra")
                 apply("org.jlleitschuh.gradle.ktlint") // Useful even on non-Kotlin projects for buildscript formatting
             }
 
-            project.version = rootProject.version
-            project.group = rootProject.group
-            project.description = rootProject.description
-
-            extensions.findByType<LicenseExtension>()?.apply {
-                exclude {
-                    it.file.startsWith(buildDir)
+            tasks.withType<Sign>().configureEach {
+                it.onlyIf {
+                    // TODO: Use exposed isRelease from indra 1.1
+                    hasProperty("forceSign") || !it.project.version.toString().endsWith("-SNAPSHOT") // isRelease(it.project)
                 }
-                include(SOURCE_FILES)
+            }
 
-                val headerFile = rootProject.file("LICENSE_HEADER")
-                if (headerFile.isFile) {
+            val headerFile = rootProject.file("LICENSE_HEADER")
+            if (headerFile.isFile) {
+                apply("net.kyori.indra.license-header")
+
+                extensions.findByType<LicenseExtension>()?.apply {
+                    exclude {
+                        it.file.startsWith(buildDir)
+                    }
                     header = headerFile
                 }
             }
 
             // add useful repos
-            registerExtensions(repositories)
+            registerRepositoryExtensions(repositories, MINECRAFT_REPOSITORIES)
 
-            // Generate + use javadoc and sources jars
-
-            val java = extensions.getByType<JavaPluginExtension>().apply {
-                withJavadocJar()
-                withSourcesJar()
-            }
-
-            tasks.named("build").configure {
-                it.dependsOn(tasks.named("javadocJar"))
-                it.dependsOn(tasks.named("sourcesJar"))
-            }
-
-            val checkstyleDir = rootProject.projectDir.resolve("etc/checkstyle")
-            if (checkstyleDir.isDirectory && checkstyleDir.resolve("checkstyle.xml").isFile) {
-                apply(plugin = "checkstyle")
-                extensions.configure<CheckstyleExtension> {
-                    toolVersion = "8.32"
-                    configDirectory.set(checkstyleDir)
-                    configProperties = mapOf(
-                        "severity" to "error"
-                    )
+            tasks.withType<Javadoc>().configureEach {
+                val options = it.options
+                val version = JavaVersion.toVersion(it.toolChain.version)
+                if (version == JavaVersion.VERSION_12) {
+                    throw GradleException("Javadoc cannot be generated on JDK 12 -- " +
+                            "see https://bugs.openjdk.java.net/browse/JDK-8222091")
                 }
+                if (options is StandardJavadocDocletOptions) {
+                    options.linkSource()
+                }
+            }
+
+            if (file(".checkstyle/checkstyle.xml").isFile) {
+                apply(plugin = "net.kyori.indra.checkstyle")
             }
 
             afterEvaluate {
-                java.apply {
-                    sourceCompatibility = extension.javaVersion
-                    targetCompatibility = extension.javaVersion
-                }
-
-                // Make sure we have a consistent encoding
-                tasks.withType<JavaCompile>().configureEach {
-                    it.options.apply {
-                        encoding = UTF_8
-                        release.set(extension.javaVersion.ordinal + 1)
-                        compilerArgs.addAll(
-                            listOf(
-                                "-Xlint:all",
-                                "-Xlint:-serial", // ignore missing serialVersionUID
-                                "-Xlint:-processing" // don't warn when annotation processors aren't claimed
-                            )
-                        )
-                        if (JavaVersion.toVersion(it.toolChain.version).isJava9Compatible) {
-                            compilerArgs.addAll(listOf(
-                                "-Xdoclint", "-Xdoclint:-missing" // javadoc: warn about everything except missing comment (broken on JDK8)
-                            ))
-                        }
-                    }
-                }
-
-                tasks.withType<Javadoc>().configureEach {
-                    val options = it.options
-                    val version = JavaVersion.toVersion(it.toolChain.version)
-                    if (version == JavaVersion.VERSION_12) {
-                        throw GradleException("Javadoc cannot be generated on JDK 12 -- " +
-                                "see https://bugs.openjdk.java.net/browse/JDK-8222091")
-                    }
-                    options.encoding = UTF_8
-                    if (options is StandardJavadocDocletOptions) {
-                        options.source = extension.javaVersion.toString()
-                        if (version.isJava9Compatible) {
-                            options.addBooleanOption("html5", true)
-                        }
-                        options.links(extension.javaVersion.javaDocLinkUrl)
-                        options.linkSource()
-                    }
-                }
-
-                // Make builds more reproducible
-                tasks.withType<AbstractArchiveTask>().configureEach {
-                    it.isPreserveFileTimestamps = false
-                    it.isReproducibleFileOrder = true
-                }
-
                 if (extension.automaticModuleNames) {
                     tasks.named<Jar>("jar").configure {
                         it.manifest.attributes(mapOf("Automatic-Module-Name" to "$group.${name.replace("-", ".").toLowerCase(Locale.ROOT)}"))
                     }
                 }
-
-                if (extension.usesJUnit5) {
-                    tasks.withType<Test>().configureEach {
-                        it.useJUnitPlatform()
-                    }
-
-                    extensions.getByType<SourceSetContainer>().named("test").configure {
-                        dependencies.apply {
-                            val junitVersion = findProperty(VERSION_JUNIT_PROPERTY) ?: VERSION_JUNIT_DEFAULT
-                            add(
-                                it.implementationConfigurationName,
-                                "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-                            )
-                            add(
-                                it.runtimeOnlyConfigurationName,
-                                "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-                            )
-                        }
-                    }
-                }
             }
         }
-    }
-}
-
-internal val JavaVersion.javaDocLinkUrl: String get() {
-    return if (isJava11Compatible) {
-        "https://docs.oracle.com/en/java/javase/$majorVersion/docs/api"
-    } else {
-        "https://docs.oracle.com/javase/$majorVersion/docs/api"
     }
 }

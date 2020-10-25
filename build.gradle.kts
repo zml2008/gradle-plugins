@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "ca.stellardrift"
-version = "3.2-SNAPSHOT"
+version = "4.0-SNAPSHOT"
 
 subprojects {
     apply(plugin="java-gradle-plugin")

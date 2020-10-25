@@ -17,7 +17,7 @@
 package ca.stellardrift.build.kotlin
 
 import ca.stellardrift.build.common.OpinionatedDefaultsPlugin
-import ca.stellardrift.build.common.getOrCreateOpinionatedExtension
+import net.kyori.indra.extension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -32,14 +32,14 @@ class OpinionatedKotlinDefaultsPlugin : Plugin<Project> {
                 add("implementation", "org.jetbrains.kotlin:kotlin-stdlib-jdk8")
             }
 
-            val stellardriftExtension = getOrCreateOpinionatedExtension()
+            val indraExtension = extension(this)
             tasks.withType(KotlinCompile::class.java).configureEach {
                 it.kotlinOptions.freeCompilerArgs += listOf("-Xjvm-default=enable")
             }
 
             afterEvaluate {
                 tasks.withType(KotlinCompile::class.java).configureEach {
-                    it.kotlinOptions.jvmTarget = stellardriftExtension.javaVersion.toString()
+                    it.kotlinOptions.jvmTarget = indraExtension.java.get().toString()
                 }
             }
         }
