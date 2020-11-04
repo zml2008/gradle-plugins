@@ -20,11 +20,13 @@ import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.AbstractConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.util.UnmodifiableCollections;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
@@ -34,9 +36,16 @@ import static java.util.Objects.requireNonNull;
  */
 public final class ConfigProcessor<B extends AbstractConfigurationLoader.Builder<B, L>, L extends AbstractConfigurationLoader<?>> implements ConfigSource, ConfigTarget {
     private final Supplier<B> builderMaker;
+    private final Set<String> extensions;
 
-    ConfigProcessor(final Supplier<B> builderMaker) {
+    ConfigProcessor(final Supplier<B> builderMaker, final String... extensions) {
         this.builderMaker = requireNonNull(builderMaker);
+        this.extensions = UnmodifiableCollections.toSet(extensions);
+    }
+
+    private ConfigProcessor(final Supplier<B> builderMaker, final Set<String> extensions) {
+        this.builderMaker = requireNonNull(builderMaker);
+        this.extensions = extensions;
     }
 
     @Override
@@ -58,12 +67,27 @@ public final class ConfigProcessor<B extends AbstractConfigurationLoader.Builder
         loader.save(node);
     }
 
+    /**
+     * Create a derived configuration format that applies additional configuration to this format's builder.
+     *
+     * @param builderModifier The builder modifier
+     * @return a derived format
+     */
     public ConfigProcessor<B, L> configured(final Action<B> builderModifier) {
         requireNonNull(builderModifier, "builderModifier");
         return new ConfigProcessor<>(() -> {
             final B ret = this.builderMaker.get();
             builderModifier.execute(ret);
             return ret;
-        });
+        }, this.extensions);
+    }
+
+    /**
+     * Get extensions known to be supported by this configuration format.
+     *
+     * @return supported extensions
+     */
+    public Set<String> extensions() {
+        return this.extensions;
     }
 }

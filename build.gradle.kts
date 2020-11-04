@@ -1,7 +1,7 @@
 import com.gradle.publish.PluginBundleExtension
 
 plugins {
-    kotlin("jvm") version "1.3.72" apply false // we must override what we're providing ourself... whoo circular dependencies
+    kotlin("jvm") version "1.4.10" apply false // we must override what we're providing ourself... whoo circular dependencies
 
     val indraVersion = "1.3.1"
     id("net.kyori.indra") version indraVersion apply false
