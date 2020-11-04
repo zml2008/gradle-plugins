@@ -1,12 +1,16 @@
 import ca.stellardrift.build.common.configurate
 import ca.stellardrift.build.common.sonatypeOss
 import ca.stellardrift.build.self.declarePlugin
+plugins {
+    groovy
+}
 
 repositories {
     sonatypeOss()
 }
 
 dependencies {
+    implementation(localGroovy())
     api(platform(configurate("bom", "4.0.0-SNAPSHOT")))
     api(configurate("extra-kotlin"))
     api(configurate("hocon"))
