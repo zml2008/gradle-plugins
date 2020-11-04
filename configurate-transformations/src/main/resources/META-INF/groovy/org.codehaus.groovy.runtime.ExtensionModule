@@ -1,3 +1,0 @@
-moduleName=Configurate transformation ContentFilterable extensions
-moduleVersion=${version}
-extensionClasses=ca.stellardrift.build.transformations.ContentFilterableExtensions
