@@ -30,6 +30,7 @@ public interface ConfigTarget {
      *
      * @param destination target to write to
      * @param node source node
+     * @throws ConfigurateException if any part of the node could not be written
      */
     void write(final Writer destination, final ConfigurationNode node) throws ConfigurateException;
 }

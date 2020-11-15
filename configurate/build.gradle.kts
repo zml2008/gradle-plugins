@@ -1,13 +1,8 @@
 import ca.stellardrift.build.common.configurate
-import ca.stellardrift.build.common.sonatypeOss
 import ca.stellardrift.build.self.declarePlugin
 
 plugins {
     groovy
-}
-
-repositories {
-    sonatypeOss()
 }
 
 tasks.processResources {
@@ -18,7 +13,7 @@ tasks.processResources {
 
 dependencies {
     implementation(localGroovy())
-    api(platform(configurate("bom", "4.0.0-SNAPSHOT")))
+    api(platform(configurate("bom", "4.0.0")))
     api(configurate("extra-kotlin"))
     api(configurate("hocon"))
     api(configurate("yaml"))
