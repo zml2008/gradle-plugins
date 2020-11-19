@@ -49,6 +49,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         apply(plugin = "com.github.fudge.forgedflowerloom")
 
         val minecraft = extensions.getByType<LoomGradleExtension>()
+        val indra = indraExtension(this)
 
         // Set up refmap
         minecraft.refmapName = "${project.name.toLowerCase(Locale.ROOT)}-refmap.json"
@@ -82,6 +83,23 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             }
         }
 
+        indra.includeJavaSoftwareComponentInPublications.set(false)
+        indra.configurePublications(Action {
+            val remapJar = tasks["remapJar"]
+            val remapSourcesJar = tasks["remapSourcesJar"]
+            it.suppressAllPomMetadataWarnings()
+
+            it.artifact(tasks[mainSourceSet.get().jarTaskName]) { a ->
+                a.classifier = "dev"
+            }
+            it.artifact(remapJar)
+
+            it.artifact(tasks[mainSourceSet.get().sourcesJarTaskName]) { a ->
+                a.builtBy(remapSourcesJar)
+            }
+            it.artifact(tasks[mainSourceSet.get().javadocJarTaskName])
+        })
+
         afterEvaluate { proj ->
             // Automatically link to Fabric and Yarn JD
             val depLinks = mutableListOf<String>()
@@ -103,24 +121,6 @@ class OpinionatedFabricPlugin : Plugin<Project> {
                 }
             }
 
-            // Set up publishing to publish remapped, dev, sources, and JD jars
-            // TODO: The main indra plugin sets up publication using the `java` software component, but this is wrong
-            // (because loom is bad)
-            indraExtension(proj).configurePublications(Action {
-                val remapJar = tasks["remapJar"]
-                val remapSourcesJar = tasks["remapSourcesJar"]
-                it.suppressAllPomMetadataWarnings()
-
-                it.artifact(tasks[mainSourceSet.get().jarTaskName]) { a ->
-                    a.classifier = "dev"
-                }
-                it.artifact(remapJar)
-
-                it.artifact(tasks[mainSourceSet.get().sourcesJarTaskName]) { a ->
-                    a.builtBy(remapSourcesJar)
-                }
-                it.artifact(tasks[mainSourceSet.get().javadocJarTaskName])
-            })
         }
     }
 
