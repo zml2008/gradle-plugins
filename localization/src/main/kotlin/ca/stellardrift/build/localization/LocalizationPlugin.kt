@@ -25,9 +25,11 @@ import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.plugins.JvmEcosystemPlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
@@ -36,6 +38,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
@@ -122,10 +125,8 @@ abstract class LocalizationGenerate : DefaultTask() {
  * This becomes another resource root. In addition
  */
 class LocalizationPlugin : Plugin<Project> {
-    override fun apply(project: Project) = with(project) {
-        val extension = extensions.create<LocalizationExtension>("localization")
-        val parentTask = tasks.register("generateAllLocalizations")
 
+    private fun actuallyApply(project: Project, extension: LocalizationExtension, parentTask: TaskProvider<Task>): Unit = with(project) {
         val sSets = extensions.getByType<SourceSetContainer>()
         sSets.configureEach {
             val messagesFileBasedir = project.file("src/${it.name}/$MESSAGES_ROOT_NAME")
@@ -152,19 +153,22 @@ class LocalizationPlugin : Plugin<Project> {
                     compile.dependsOn(task)
                 }
 
+                extension.templateType.finalizeValue()
                 if (extension.templateType.get() == TemplateType.KOTLIN) {
-                    project.tasks.findByName(it.getCompileTaskName("Kotlin"))?.dependsOn(task)
+                    plugins.withId("org.jetbrains.kotlin.jvm") { _ ->
+                        project.tasks.findByName(it.getCompileTaskName("Kotlin"))?.dependsOn(task)
+                    }
                 }
 
                 /*when (extension.templateType.get()) {
-                    TemplateType.KOTLIN -> {
-                        project.extensions.findByType(KotlinSourceSetContainer::class.java)?.sourceSets?.named(it.name)
-                            ?.configure { set ->
-                                set.kotlin.srcDir(task.map { t -> t.generatedSourcesOut })
-                                project.tasks.named(it.getCompileTaskName("Kotlin")) {
-                                    it.dependsOn(task)
-                                }
+                TemplateType.KOTLIN -> {
+                    project.extensions.findByType(KotlinSourceSetContainer::class.java)?.sourceSets?.named(it.name)
+                        ?.configure { set ->
+                            set.kotlin.srcDir(task.map { t -> t.generatedSourcesOut })
+                            project.tasks.named(it.getCompileTaskName("Kotlin")) {
+                                it.dependsOn(task)
                             }
+                        }
                     }
                     TemplateType.JAVA -> {
                     }
@@ -174,6 +178,15 @@ class LocalizationPlugin : Plugin<Project> {
                 }*/
                 it.resources.srcDir(task.map { t -> t.resourceBundleSources })
             }
+        }
+    }
+
+    override fun apply(project: Project) {
+        val extension = project.extensions.create<LocalizationExtension>("localization")
+        val parentTask = project.tasks.register("generateAllLocalizations")
+
+        project.plugins.withType(JvmEcosystemPlugin::class.java) {
+            actuallyApply(project, extension, parentTask)
         }
     }
 }

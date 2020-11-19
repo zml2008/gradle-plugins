@@ -19,6 +19,7 @@ package ca.stellardrift.build.templating
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JvmEcosystemPlugin
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.SourceSetContainer
@@ -53,41 +54,45 @@ open class GenerateTemplateTask : Copy() {
 }
 
 class TemplatingPlugin : Plugin<Project> {
-    override fun apply(target: Project) {
-        with(target) {
-            extensions.getByType<SourceSetContainer>().configureEach { src ->
-                val taskName = src.getTaskName("generate", "Templates")
-                val task = tasks.register<GenerateTemplateTask>(taskName) {
-                    val output = project.layout.buildDirectory.dir("generated-src/${src.name}/templates")
-                    includeRoot(file("src/${src.name}/templates"))
-                    into(output)
-                }
 
-                plugins.withId("kotlin") {
-                    /*extensions.getByType(KotlinSourceSetContainer::class.java).sourceSets.getByName(src.name)
-                        .apply {
-                            kotlin.srcDir(task.map { it.outputs })
-                        }*/
-                    tasks.named(src.getCompileTaskName("Kotlin")).configure { t ->
-                        t.dependsOn(task)
-                    }
-                }
+    private fun whenJvmEcosystemPresent(target: Project) = with(target) {
+        extensions.getByType<SourceSetContainer>().configureEach { src ->
+            val taskName = src.getTaskName("generate", "Templates")
+            val task = tasks.register<GenerateTemplateTask>(taskName) {
+                val output = project.layout.buildDirectory.dir("generated-src/${src.name}/templates")
+                includeRoot(file("src/${src.name}/templates"))
+                into(output)
+            }
 
-                plugins.withType(JavaPlugin::class.java) {
-                    src.java.srcDir(task.map { it.outputs })
-                    tasks.named(src.compileJavaTaskName).configure { t ->
-                        t.dependsOn(task)
-                    }
+            plugins.withId("kotlin") {
+                /*extensions.getByType(KotlinSourceSetContainer::class.java).sourceSets.getByName(src.name)
+                    .apply {
+                        kotlin.srcDir(task.map { it.outputs })
+                    }*/
+                tasks.named(src.getCompileTaskName("Kotlin")).configure { t ->
+                    t.dependsOn(task)
                 }
             }
 
-            afterEvaluate {
-                tasks.withType(GenerateTemplateTask::class.java).configureEach {
-                    if (!it.hasProperties) {
-                        it.properties("project" to project)
-                    }
+            plugins.withType(JavaPlugin::class.java) {
+                src.java.srcDir(task.map { it.outputs })
+                tasks.named(src.compileJavaTaskName).configure { t ->
+                    t.dependsOn(task)
                 }
             }
         }
+
+        afterEvaluate {
+            tasks.withType(GenerateTemplateTask::class.java).configureEach {
+                if (!it.hasProperties) {
+                    it.properties("project" to project)
+                }
+            }
+        }
+
+    }
+
+    override fun apply(target: Project) {
+        target.plugins.withType(JvmEcosystemPlugin::class.java) { whenJvmEcosystemPresent(target) }
     }
 }
