@@ -56,29 +56,30 @@ class TemplatingPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             extensions.getByType<SourceSetContainer>().configureEach { src ->
-                    val taskName = src.getTaskName("generate", "Templates")
-                    val task = tasks.register<GenerateTemplateTask>(taskName) {
-                        val output = project.layout.buildDirectory.dir("generated-src/${src.name}/templates")
-                        includeRoot(file("src/${src.name}/templates"))
-                        into(output)
-                    }
+                val taskName = src.getTaskName("generate", "Templates")
+                val task = tasks.register<GenerateTemplateTask>(taskName) {
+                    val output = project.layout.buildDirectory.dir("generated-src/${src.name}/templates")
+                    includeRoot(file("src/${src.name}/templates"))
+                    into(output)
+                }
 
-                    if (plugins.hasPlugin("kotlin")) { // we are using kotlin
-                        /*extensions.getByType(KotlinSourceSetContainer::class.java).sourceSets.getByName(src.name)
-                            .apply {
-                                kotlin.srcDir(task.map { it.outputs })
-                            }*/
-                        tasks.named(src.getCompileTaskName("Kotlin")).configure { t ->
-                            t.dependsOn(task)
-                        }
-                    }
-                    if (plugins.hasPlugin(JavaPlugin::class.java)) {
-                        src.java.srcDir(task.map { it.outputs })
-                        tasks.named(src.compileJavaTaskName).configure { t ->
-                            t.dependsOn(task)
-                        }
+                plugins.withId("kotlin") {
+                    /*extensions.getByType(KotlinSourceSetContainer::class.java).sourceSets.getByName(src.name)
+                        .apply {
+                            kotlin.srcDir(task.map { it.outputs })
+                        }*/
+                    tasks.named(src.getCompileTaskName("Kotlin")).configure { t ->
+                        t.dependsOn(task)
                     }
                 }
+
+                plugins.withType(JavaPlugin::class.java) {
+                    src.java.srcDir(task.map { it.outputs })
+                    tasks.named(src.compileJavaTaskName).configure { t ->
+                        t.dependsOn(task)
+                    }
+                }
+            }
 
             afterEvaluate {
                 tasks.withType(GenerateTemplateTask::class.java).configureEach {
