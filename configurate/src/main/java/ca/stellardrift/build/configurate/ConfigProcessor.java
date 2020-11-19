@@ -16,8 +16,55 @@
 
 package ca.stellardrift.build.configurate;
 
+import org.gradle.api.Action;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.loader.AbstractConfigurationLoader;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.function.Supplier;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * An operator that can both read and write configurations
  */
-public interface ConfigProcessor extends ConfigSource, ConfigTarget {
+public final class ConfigProcessor<B extends AbstractConfigurationLoader.Builder<B, L>, L extends AbstractConfigurationLoader<?>> implements ConfigSource, ConfigTarget {
+    private final Supplier<B> builderMaker;
+
+    ConfigProcessor(final Supplier<B> builderMaker) {
+        this.builderMaker = requireNonNull(builderMaker);
+    }
+
+    @Override
+    public ConfigurationNode read(Reader reader) throws ConfigurateException {
+        requireNonNull(reader, "reader");
+        final ConfigurationLoader<?> loader = this.builderMaker.get()
+                .source(() -> new BufferedReader(reader))
+                .build();
+        return loader.load();
+    }
+
+    @Override
+    public void write(Writer destination, ConfigurationNode node) throws ConfigurateException {
+        requireNonNull(destination, "destination");
+        requireNonNull(node, "node");
+        final ConfigurationLoader<?> loader = this.builderMaker.get()
+                .sink(() -> new BufferedWriter(destination))
+                .build();
+        loader.save(node);
+    }
+
+    public ConfigProcessor<B, L> configured(final Action<B> builderModifier) {
+        requireNonNull(builderModifier, "builderModifier");
+        return new ConfigProcessor<>(() -> {
+            final B ret = this.builderMaker.get();
+            builderModifier.execute(ret);
+            return ret;
+        });
+    }
 }

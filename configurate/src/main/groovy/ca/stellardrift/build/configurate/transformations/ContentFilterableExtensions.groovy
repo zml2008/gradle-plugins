@@ -69,7 +69,7 @@ class ContentFilterableExtensions {
      * @param configType for the type of a configuration file
      * @param transformer the action to perform on each node
      */
-    static void transform(final ContentFilterable self, final ConfigProcessor configType,
+    static void transform(final ContentFilterable self, final ConfigProcessor<?, ?> configType,
                           final @DelegatesTo(ConfigurationNode) Closure transformer) {
         self.filter([
                 (ConfigurateFilterReader.PARAM_SOURCE)     : configType,

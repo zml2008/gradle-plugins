@@ -48,7 +48,7 @@ fun ContentFilterable.convertFormat(source: ConfigSource, dest: ConfigTarget, tr
 /**
  * Load every file to be processed
  */
-fun ContentFilterable.transform(configType: ConfigProcessor, transformer: Action<ConfigurationNode>) {
+fun ContentFilterable.transform(configType: ConfigProcessor<*, *>, transformer: Action<ConfigurationNode>) {
     this.filter(mapOf(
             ConfigurateFilterReader.PARAM_SOURCE to configType,
             ConfigurateFilterReader.PARAM_DEST to configType,

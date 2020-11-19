@@ -16,51 +16,21 @@
 
 package ca.stellardrift.build.configurate;
 
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.gson.GsonConfigurationLoader;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.configurate.loader.AbstractConfigurationLoader;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.xml.XmlConfigurationLoader;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.function.Supplier;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Standard formats for configuration
  */
-public enum ConfigFormats implements ConfigProcessor {
-    HOCON(HoconConfigurationLoader::builder),
-    JSON(GsonConfigurationLoader::builder),
-    YAML(YamlConfigurationLoader::builder),
-    XML(XmlConfigurationLoader::builder);
+public final class ConfigFormats {
+    public static final ConfigProcessor<HoconConfigurationLoader.Builder, HoconConfigurationLoader> HOCON = new ConfigProcessor<>(HoconConfigurationLoader::builder);
+    public static final ConfigProcessor<GsonConfigurationLoader.Builder, GsonConfigurationLoader> JSON = new ConfigProcessor<>(GsonConfigurationLoader::builder);
+    public static final ConfigProcessor<YamlConfigurationLoader.Builder, YamlConfigurationLoader> YAML = new ConfigProcessor<>(YamlConfigurationLoader::builder);
+    public static final ConfigProcessor<XmlConfigurationLoader.Builder, XmlConfigurationLoader> XML = new ConfigProcessor<>(XmlConfigurationLoader::builder);
 
-    private final Supplier<AbstractConfigurationLoader.Builder<?, ?>> builderMaker;
-
-    ConfigFormats(final Supplier<AbstractConfigurationLoader.Builder<?, ?>> builderMaker) {
-        this.builderMaker = requireNonNull(builderMaker);
+    private ConfigFormats() {
     }
 
-    @Override
-    public ConfigurationNode read(Reader reader) throws ConfigurateException {
-        final ConfigurationLoader<?> loader = this.builderMaker.get()
-                .source(() -> new BufferedReader(reader))
-                .build();
-        return loader.load();
-    }
-
-    @Override
-    public void write(Writer destination, ConfigurationNode node) throws ConfigurateException {
-        final ConfigurationLoader<?> loader = this.builderMaker.get()
-                .sink(() -> new BufferedWriter(destination))
-                .build();
-        loader.save(node);
-    }
 }
