@@ -17,6 +17,7 @@
 package ca.stellardrift.build.common
 
 import java.util.Locale
+import net.kyori.indra.isRelease
 import net.kyori.indra.registerRepositoryExtensions
 import org.cadixdev.gradle.licenser.LicenseExtension
 import org.gradle.api.GradleException
@@ -27,7 +28,6 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.Sign
@@ -44,20 +44,19 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
 
             tasks.withType<Sign>().configureEach {
                 it.onlyIf {
-                    // TODO: Use exposed isRelease from indra 1.1
-                    hasProperty("forceSign") || !it.project.version.toString().endsWith("-SNAPSHOT") // isRelease(it.project)
+                    hasProperty("forgeSign") || isRelease(it.project) // remove at indra 1.2
                 }
             }
 
             val headerFile = rootProject.file("LICENSE_HEADER")
             if (headerFile.isFile) {
-                apply("net.kyori.indra.license-header")
+                apply(plugin = "net.kyori.indra.license-header")
 
-                extensions.findByType<LicenseExtension>()?.apply {
-                    exclude {
+                extensions.configure(LicenseExtension::class.java) {
+                    it.exclude {
                         it.file.startsWith(buildDir)
                     }
-                    header = headerFile
+                    it.header = headerFile
                 }
             }
 
@@ -66,11 +65,6 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
 
             tasks.withType<Javadoc>().configureEach {
                 val options = it.options
-                val version = JavaVersion.toVersion(it.toolChain.version)
-                if (version == JavaVersion.VERSION_12) {
-                    throw GradleException("Javadoc cannot be generated on JDK 12 -- " +
-                            "see https://bugs.openjdk.java.net/browse/JDK-8222091")
-                }
                 if (options is StandardJavadocDocletOptions) {
                     options.linkSource()
                 }
