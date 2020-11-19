@@ -18,6 +18,7 @@ package ca.stellardrift.build.kotlin
 
 import ca.stellardrift.build.common.OpinionatedDefaultsPlugin
 import net.kyori.indra.extension
+import net.kyori.indra.versionString
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -39,7 +40,7 @@ class OpinionatedKotlinDefaultsPlugin : Plugin<Project> {
 
             afterEvaluate {
                 tasks.withType(KotlinCompile::class.java).configureEach {
-                    it.kotlinOptions.jvmTarget = indraExtension.java.get().toString()
+                    it.kotlinOptions.jvmTarget = versionString(indraExtension.javaVersions.target.get())
                 }
             }
         }
