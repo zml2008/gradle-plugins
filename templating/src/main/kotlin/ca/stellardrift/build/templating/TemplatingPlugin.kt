@@ -89,7 +89,6 @@ class TemplatingPlugin : Plugin<Project> {
                 }
             }
         }
-
     }
 
     override fun apply(target: Project) {
