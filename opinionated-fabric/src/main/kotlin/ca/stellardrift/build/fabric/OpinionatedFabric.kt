@@ -35,8 +35,8 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
+import org.gradle.language.jvm.tasks.ProcessResources
 
 private const val FABRIC_MOD_DESCRIPTOR = "fabric.mod.json"
 private const val TESTMOD_SOURCE_SET = "testmod"
@@ -63,7 +63,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             dependencies.add(it.implementationConfigurationName, mainSourceSet.get().output)
         }
 
-        val testModJar = tasks.register<Jar>(testModSet.get().jarTaskName).configure {
+        val testModJar = tasks.register(testModSet.get().jarTaskName, Jar::class.java) {
             it.archiveClassifier.set("$TESTMOD_SOURCE_SET-dev")
             it.group = "build"
 
@@ -76,11 +76,11 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         // Set up mixin source sets
         applyMixinSourceSets(this, mainSourceSet.get())
 
-        /*tasks.withType(ProcessResources::class.java).configureEach {
-            it.filesMatching(FABRIC_MOD_DESCRIPTOR) { modJson -> // TODO: throws UnsupportedOperationException???
-                modJson.expand(mapOf("project" to it.project))
+        tasks.withType(ProcessResources::class.java).configureEach {
+            it.filesMatching(FABRIC_MOD_DESCRIPTOR) { modJson ->
+                modJson.expand(mutableMapOf("project" to it.project))
             }
-        }*/
+        }
 
         afterEvaluate { proj ->
             // Automatically link to Fabric and Yarn JD
@@ -147,13 +147,24 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         val sourceSets = project.extensions.getByType<SourceSetContainer>()
 
         // Accessor
-        // can see minecraft + its dependencies
+        // can see minecraft + its dependencies + all project dependencies
         // can be seen by project
         val accessor = sourceSets.register(base.getTaskName(null, "accessor")) {
-            project.configurations.named(it.implementationConfigurationName).configure { c ->
-                c.extendsFrom(project.configurations.named(Constants.Configurations.MINECRAFT_NAMED).get())
+            sequenceOf(
+                    SourceSet::getCompileOnlyConfigurationName,
+                    SourceSet::getImplementationConfigurationName,
+                    SourceSet::getRuntimeOnlyConfigurationName
+            ).forEach { configGetter ->
+                project.configurations.named(configGetter(it)) { config ->
+                    config.extendsFrom(project.configurations.getByName(configGetter(base)))
+                }
             }
-            project.dependencies.add(base.implementationConfigurationName, it.output)
+            project.configurations.named(it.implementationConfigurationName) { c ->
+                c.extendsFrom(project.configurations.getByName(Constants.Configurations.MINECRAFT_NAMED))
+            }
+
+            project.dependencies.add(base.compileClasspathConfigurationName, it.output)
+            project.dependencies.add(base.runtimeClasspathConfigurationName, it.output)
         }
 
         // Mixin
