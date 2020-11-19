@@ -21,13 +21,13 @@ import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 
 fun RepositoryHandler.sponge() = sponge.addTo(this)
-private val sponge = RemoteRepository("sponge", "https://repo-new.spongepowered.org/content/maven-public/")
+private val sponge = RemoteRepository("sponge", "https://repo-new.spongepowered.org/repository/maven-public/")
 
 fun RepositoryHandler.spongeSnapshots() = spongeSnapshots.addTo(this)
-private val spongeSnapshots = RemoteRepository("spongeSnapshots", "https://repo-new.spongepowered.org/content/snapshots/", releases = false)
+private val spongeSnapshots = RemoteRepository("spongeSnapshots", "https://repo-new.spongepowered.org/repository/snapshots/", releases = false)
 
 fun RepositoryHandler.spongeReleases() = spongeReleases.addTo(this)
-private val spongeReleases = RemoteRepository("spongeReleases", "https://repo-new.spongepowered.org/content/releases/", snapshots = false)
+private val spongeReleases = RemoteRepository("spongeReleases", "https://repo-new.spongepowered.org/repository/releases/", snapshots = false)
 
 fun RepositoryHandler.engineHub() = engineHub.addTo(this)
 private val engineHub = RemoteRepository("engineHub", "https://maven.enginehub.org/repo/")
