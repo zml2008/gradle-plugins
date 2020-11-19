@@ -20,8 +20,6 @@ import java.util.Locale
 import net.kyori.indra.isRelease
 import net.kyori.indra.registerRepositoryExtensions
 import org.cadixdev.gradle.licenser.LicenseExtension
-import org.gradle.api.GradleException
-import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
