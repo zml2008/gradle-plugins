@@ -120,7 +120,6 @@ class OpinionatedFabricPlugin : Plugin<Project> {
                     }
                 }
             }
-
         }
     }
 
@@ -163,8 +162,8 @@ class OpinionatedFabricPlugin : Plugin<Project> {
                 c.extendsFrom(project.configurations.getByName(Constants.Configurations.MINECRAFT_NAMED))
             }
 
-            project.dependencies.add(base.compileClasspathConfigurationName, it.output)
-            project.dependencies.add(base.runtimeClasspathConfigurationName, it.output)
+            base.compileClasspath += it.output
+            base.runtimeClasspath += it.output
         }
 
         // Mixin
