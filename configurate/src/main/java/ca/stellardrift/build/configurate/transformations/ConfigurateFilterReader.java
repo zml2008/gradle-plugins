@@ -29,7 +29,11 @@ import java.nio.charset.StandardCharsets;
 
 import static java.util.Objects.requireNonNull;
 
-class ConfigurateFilterReader extends FilterReader {
+/**
+ * An implementation of {@link FilterReader} that transforms
+ * the read content from one configuration format to another.
+ */
+public class ConfigurateFilterReader extends FilterReader {
 
     public static final String PARAM_SOURCE = "source";
     public static final String PARAM_DEST = "dest";
@@ -43,13 +47,14 @@ class ConfigurateFilterReader extends FilterReader {
     private @MonotonicNonNull ConfigTarget dest;
     private @Nullable Action<ConfigurationNode> transformer;
     private boolean setUp = false;
+
     /**
      * Creates a new filtered reader.
      *
      * @param in a Reader object providing the underlying stream.
      * @throws NullPointerException if <code>in</code> is <code>null</code>
      */
-    ConfigurateFilterReader(final @NonNull Reader in) {
+    public ConfigurateFilterReader(final @NonNull Reader in) {
         super(in);
         this.original = in;
     }

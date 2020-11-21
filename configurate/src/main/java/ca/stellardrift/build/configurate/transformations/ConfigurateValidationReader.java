@@ -17,12 +17,12 @@
 package ca.stellardrift.build.configurate.transformations;
 
 import ca.stellardrift.build.configurate.ConfigSource;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-class ConfigurateValidationReader extends FilterReader {
+public class ConfigurateValidationReader extends FilterReader {
 
     public static final String PARAM_FORMAT = "format";
 
@@ -34,7 +34,7 @@ class ConfigurateValidationReader extends FilterReader {
      * @param in a Reader object providing the underlying stream.
      * @throws NullPointerException if <code>in</code> is <code>null</code>
      */
-    protected ConfigurateValidationReader(@NotNull Reader in) {
+    public ConfigurateValidationReader(final @NonNull Reader in) {
         super(in);
         this.original = in;
     }
