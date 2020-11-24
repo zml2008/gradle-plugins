@@ -163,6 +163,12 @@ class OpinionatedFabricPlugin : Plugin<Project> {
 
             base.compileClasspath += it.output
             base.runtimeClasspath += it.output
+
+            if (base.javadocTaskName in project.tasks.names) {
+                project.tasks.named(base.javadocTaskName, Javadoc::class) {
+                    classpath += it.output
+                }
+            }
         }
 
         // Mixin
