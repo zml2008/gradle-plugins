@@ -2,6 +2,7 @@ import ca.stellardrift.build.self.declarePlugin
 
 dependencies {
     implementation(project(":gradle-plugin-opinionated-common"))
+    implementation(kotlin("stdlib-jdk8", "1.4.10"))
     implementation(kotlin("gradle-plugin", "1.4.10"))
 }
 
