@@ -1,9 +1,9 @@
-import ca.stellardrift.build.self.declarePlugin
-
-declarePlugin(
-    "localization",
-    "localization.LocalizationPlugin",
-    "Localization",
-    "Code generation for resource bundle strings",
-    tags = listOf("codegen", "i18n", "l10n", "generation")
-)
+indraPluginPublishing {
+    plugin(
+        "localization",
+        "ca.stellardrift.build.localization.LocalizationPlugin",
+        "Localization",
+        "Code generation for resource bundle strings",
+        tags = listOf("codegen", "i18n", "l10n", "generation")
+    )
+}

@@ -1,5 +1,3 @@
-import ca.stellardrift.build.self.declarePlugin
-
 repositories {
     maven(url = "https://maven.fabricmc.net/") {
         name = "fabric"
@@ -7,18 +5,22 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":gradle-plugin-opinionated-common"))
+    implementation(project(":gradle-plugin-opinionated-common")) {
+        exclude(group = "org.jetbrains.kotlin")
+    }
     implementation("net.fabricmc:fabric-loom:0.5-SNAPSHOT")
     implementation("io.github.fudge:forgedflowerloom:2.0.0")
 }
 
-declarePlugin(
-    id = "opinionated.fabric",
-    mainClass = "fabric.OpinionatedFabricPlugin",
-    displayName = "Opinionated Fabric Defaults",
-    description = """
+indraPluginPublishing {
+    plugin(
+        id = "opinionated.fabric",
+        mainClass = "ca.stellardrift.build.fabric.OpinionatedFabricPlugin",
+        displayName = "Opinionated Fabric Defaults",
+        description = """
       Opinionated defaults for mods on the Fabric platform.
       
       Requires the https://maven.fabricmc.net plugin repository to be declared
       """.trimIndent()
-)
+    )
+}
