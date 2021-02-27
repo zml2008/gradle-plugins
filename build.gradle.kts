@@ -32,7 +32,6 @@ subprojects {
     repositories {
         mavenCentral()
         gradlePluginPortal()
-        mavenLocal()
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).configureEach {
