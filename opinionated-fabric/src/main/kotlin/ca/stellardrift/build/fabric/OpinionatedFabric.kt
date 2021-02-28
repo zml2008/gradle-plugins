@@ -15,8 +15,11 @@
  */
 package ca.stellardrift.build.fabric
 
+import ca.stellardrift.build.configurate.ConfigFormats
+import ca.stellardrift.build.configurate.transformations.convertFormat
 import java.util.Locale
 import net.fabricmc.loom.LoomGradleExtension
+import net.fabricmc.loom.task.AbstractRunTask
 import net.fabricmc.loom.util.Constants
 import net.kyori.indra.extension as indraExtension
 import org.gradle.api.Action
@@ -36,6 +39,7 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
 import org.gradle.language.jvm.tasks.ProcessResources
+import org.gradle.process.CommandLineArgumentProvider
 
 private const val FABRIC_MOD_DESCRIPTOR = "fabric.mod.json"
 private const val TESTMOD_SOURCE_SET = "testmod"
@@ -76,9 +80,40 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         // Set up mixin source sets
         applyMixinSourceSets(this, mainSourceSet.get())
 
+        // Convert yaml files to josn
         tasks.withType(ProcessResources::class.java).configureEach {
-            it.filesMatching(FABRIC_MOD_DESCRIPTOR) { modJson ->
-                modJson.expand(mutableMapOf("project" to it.project))
+            it.inputs.property("version", project.version)
+            it.filteringCharset = "UTF-8" // TODO: this is in indra v2
+
+            // Convert data files yaml -> json
+            it.filesMatching(
+                sequenceOf(
+                    "fabric.mod",
+                    "data/**/*",
+                    "assets/**/*"
+                ).flatMap { base -> sequenceOf("$base.yml", "$base.yaml") }
+                    .toList()
+            ) { file ->
+                file.convertFormat(ConfigFormats.YAML, ConfigFormats.JSON)
+                if (file.name.startsWith("fabric.mod")) {
+                    file.expand(mutableMapOf("project" to it.project))
+                }
+                file.name = file.name.substringBeforeLast('.') + ".json"
+            }
+            // Convert pack meta, without changing extension
+            it.filesMatching("pack.mcmeta") { it.convertFormat(ConfigFormats.YAML, ConfigFormats.JSON) }
+        }
+
+        // Enable coloured logging in Gradle run tasks in-ide
+        tasks.withType(AbstractRunTask::class).configureEach {
+            it.jvmArgumentProviders += CommandLineArgumentProvider {
+                if (System.getProperty("idea.active")?.toBoolean() == true || // IntelliJ
+                    System.getenv("TERM") != null || // linux terminals
+                    System.getenv("WT_SESSION") != null) { // Windows terminal
+                    listOf("-Dfabric.log.disableAnsi=false")
+                } else {
+                    listOf()
+                }
             }
         }
 
@@ -198,6 +233,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         project.configurations.named(base.annotationProcessorConfigurationName).configure {
             it.exclude(mapOf("group" to "net.fabricmc", "module" to "fabric-mixin-compile-extensions"))
             it.exclude(mapOf("group" to "net.fabricmc", "module" to "sponge-mixin"))
+            it.exclude(mapOf("group" to "org.spongepowered", "module" to "mixin"))
         }
 
         // Add source sets to jars

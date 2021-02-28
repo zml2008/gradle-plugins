@@ -1,10 +1,9 @@
-import ca.stellardrift.build.common.OpinionatedExtension
 import com.gradle.publish.PluginBundleExtension
 
 plugins {
     kotlin("jvm") version "1.3.72" apply false // we must override what we're providing ourself... whoo circular dependencies
 
-    id("net.kyori.indra.publishing.gradle-plugin") version "1.3.0-SNAPSHOT" apply false
+    id("net.kyori.indra.publishing.gradle-plugin") version "1.3.1" apply false
     id("ca.stellardrift.opinionated.kotlin") version "4.1" apply false
     id("com.github.ben-manes.versions") version "0.36.0"
 }

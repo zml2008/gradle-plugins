@@ -4,6 +4,12 @@ plugins {
     groovy
 }
 
+tasks.withType(GroovyCompile::class) {
+    options.release.set(8)
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
+}
+
 tasks.processResources {
     inputs.property("version", project.version)
 

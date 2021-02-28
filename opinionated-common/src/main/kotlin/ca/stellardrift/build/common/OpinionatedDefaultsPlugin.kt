@@ -40,12 +40,6 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                 apply("org.jlleitschuh.gradle.ktlint") // Useful even on non-Kotlin projects for buildscript formatting
             }
 
-            tasks.withType<Sign>().configureEach {
-                it.onlyIf {
-                    hasProperty("forgeSign") || isRelease(it.project) // remove at indra 1.2
-                }
-            }
-
             val headerFile = rootProject.file("LICENSE_HEADER")
             if (headerFile.isFile) {
                 apply(plugin = "net.kyori.indra.license-header")
