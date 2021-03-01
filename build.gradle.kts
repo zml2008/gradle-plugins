@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "ca.stellardrift"
-version = "4.2.1"
+version = "4.3-SNAPSHOT"
 description = "A suite of plugins to apply defaults preferred for Stellardrift projects"
 
 subprojects {
