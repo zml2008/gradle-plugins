@@ -50,7 +50,7 @@ fun RepositoryHandler.stellardriftReleases() = stellardriftReleases.addTo(this)
 private val stellardriftReleases = RemoteRepository("stellardriftReleases", "https://repo.stellardrift.ca/repository/stable/", snapshots = false)
 
 fun RepositoryHandler.stellardriftSnapshots() = stellardriftSnapshots.addTo(this)
-private val stellardriftSnapshots = RemoteRepository("stellardriftSnapshots", "https://repo.stellardrift.ca/repository/snapshots/", snapshots = false)
+private val stellardriftSnapshots = RemoteRepository("stellardriftSnapshots", "https://repo.stellardrift.ca/repository/snapshots/", releases = false)
 
 fun RepositoryHandler.velocityReleases() = velocityReleases.addTo(this)
 private val velocityReleases = RemoteRepository("velocityReleases", "https://repo.velocitypowered.com/releases/", snapshots = false)
@@ -69,7 +69,9 @@ internal val MINECRAFT_REPOSITORIES = listOf(
     paper,
     pex,
     cottonMc,
-    minecraft
+    minecraft,
+    stellardriftReleases,
+    stellardriftSnapshots
 )
 
 fun DependencyHandler.configurate(comp: String, version: Any? = null): String {
