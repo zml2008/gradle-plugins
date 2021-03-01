@@ -16,7 +16,6 @@
 package ca.stellardrift.build.common
 
 import java.util.Locale
-import net.kyori.indra.isRelease
 import net.kyori.indra.registerRepositoryExtensions
 import org.cadixdev.gradle.licenser.LicenseExtension
 import org.gradle.api.Plugin
@@ -28,7 +27,6 @@ import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
-import org.gradle.plugins.signing.Sign
 
 class OpinionatedDefaultsPlugin : Plugin<Project> {
     override fun apply(target: Project) {

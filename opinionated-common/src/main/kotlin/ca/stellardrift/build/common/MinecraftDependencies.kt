@@ -47,10 +47,10 @@ fun RepositoryHandler.spongeSnapshots() = spongeSnapshots.addTo(this)
 private val spongeSnapshots = RemoteRepository("spongeSnapshots", "https://repo.spongepowered.org/repository/snapshots/", releases = false)
 
 fun RepositoryHandler.stellardriftReleases() = stellardriftReleases.addTo(this)
-private  val stellardriftReleases = RemoteRepository("stellardriftReleases", "https://repo.stellardrift.ca/repository/stable/", snapshots = false)
+private val stellardriftReleases = RemoteRepository("stellardriftReleases", "https://repo.stellardrift.ca/repository/stable/", snapshots = false)
 
 fun RepositoryHandler.stellardriftSnapshots() = stellardriftSnapshots.addTo(this)
-private  val stellardriftSnapshots = RemoteRepository("stellardriftSnapshots", "https://repo.stellardrift.ca/repository/snapshots/", snapshots = false)
+private val stellardriftSnapshots = RemoteRepository("stellardriftSnapshots", "https://repo.stellardrift.ca/repository/snapshots/", snapshots = false)
 
 fun RepositoryHandler.velocityReleases() = velocityReleases.addTo(this)
 private val velocityReleases = RemoteRepository("velocityReleases", "https://repo.velocitypowered.com/releases/", snapshots = false)

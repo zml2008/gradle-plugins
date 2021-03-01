@@ -17,16 +17,24 @@ package ca.stellardrift.build.fabric
 
 import ca.stellardrift.build.configurate.ConfigFormats
 import ca.stellardrift.build.configurate.transformations.convertFormat
+import com.google.common.collect.Iterables
+import java.io.File
+import java.lang.UnsupportedOperationException
 import java.util.Locale
 import net.fabricmc.loom.LoomGradleExtension
+import net.fabricmc.loom.configuration.providers.mappings.MojangMappingsDependency
 import net.fabricmc.loom.task.AbstractRunTask
 import net.fabricmc.loom.util.Constants
 import net.kyori.indra.extension as indraExtension
 import org.gradle.api.Action
+import org.gradle.api.GradleException
+import org.gradle.api.IllegalDependencyNotation
+import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.compile.JavaCompile
@@ -41,7 +49,6 @@ import org.gradle.kotlin.dsl.withType
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.process.CommandLineArgumentProvider
 
-private const val FABRIC_MOD_DESCRIPTOR = "fabric.mod.json"
 private const val TESTMOD_SOURCE_SET = "testmod"
 internal val MIXIN_AP_ARGS = setOf("outRefMapFile", "defaultObfuscationEnv", "outMapFileNamedIntermediary", "inMapFileNamedIntermediary")
 
@@ -116,6 +123,9 @@ class OpinionatedFabricPlugin : Plugin<Project> {
                 }
             }
         }
+
+        // Set up in-place mappings migration
+        configureInPlaceMappingMigration(this)
 
         indra.includeJavaSoftwareComponentInPublications.set(false)
         indra.configurePublications(Action {
@@ -262,6 +272,87 @@ class OpinionatedFabricPlugin : Plugin<Project> {
             }
         } catch (_: UnknownTaskException) {
             // ignore, don't need to configure a task that doesn't exist
+        }
+    }
+
+    private fun configureInPlaceMappingMigration(target: Project) {
+        val mappingsCache = target.gradle.sharedServices.registerIfAbsent("mappingsCache", MappingCache::class.java) {}
+
+        // Generate mappings for old -> new
+        val mappings: Provider<File> = target.providers.gradleProperty("newMappings")
+            .forUseAtConfigurationTime()
+            .map { mappingsName ->
+                try {
+                    if (mappingsName.startsWith(MojangMappingsDependency.GROUP + ':' + MojangMappingsDependency.MODULE + ':')) {
+                        val loomExtension = target.extensions.getByType(LoomGradleExtension::class)
+                        if (!mappingsName.endsWith(":" + loomExtension.minecraftProvider.minecraftVersion)) {
+                            throw UnsupportedOperationException("Migrating Mojang mappings is currently only supported for the active minecraft version")
+                        }
+                        return@map MojangMappingsDependency(target, loomExtension).resolve()
+                    } else {
+                        val dependency = target.dependencies.create(mappingsName)
+                        return@map target.configurations.detachedConfiguration(dependency).resolve()
+                    }
+                } catch (ignored: IllegalDependencyNotation) {
+                    target.logger.info("Could not locate mappings, presuming V2 Yarn")
+                    try {
+                        return@map target.configurations.detachedConfiguration(
+                            target.dependencies
+                                .module(mapOf("group" to "net.fabricmc", "name" to "yarn", "version" to mappingsName, "classifier" to "v2"))
+                        ).resolve()
+                    } catch (ignored2: GradleException) {
+                        target.logger.info("Could not locate mappings, presuming V1 Yarn")
+                        return@map target.configurations.detachedConfiguration(
+                            target.dependencies.module(mapOf("group" to "net.fabricmc", "name" to "yarn", "version" to mappingsName))
+                        ).resolve()
+                    }
+                }
+            }.map { Iterables.getOnlyElement(it) }
+
+        val memoizedMappings = target.objects.fileProperty()
+            .fileProvider(mappings)
+        memoizedMappings.finalizeValueOnRead()
+
+        // Then set up migrations
+        val migrateInPlace = target.tasks.register("migrateMappingsAllInPlace", MigrateMappingsInPlace::class.java) {
+            it.dependsOn(target.tasks.withType(RemapSourceSet::class))
+        }
+
+        val remapOutputDir = target.layout.buildDirectory.dir("remap-in-place")
+        val outputDir = target.layout.buildDirectory.dir("remap")
+
+        target.extensions.getByType(SourceSetContainer::class).all { set ->
+            target.tasks.register("migrate${set.name.capitalize()}Mappings", RemapSourceSet::class.java) {
+                it.sourceDirs.from(set.allJava.sourceDirectories)
+                it.classpath.from(set.compileClasspath)
+                it.sourceCompatibility.set(target.tasks.named(set.compileJavaTaskName, JavaCompile::class).map {
+                    if (it.options.release.isPresent) {
+                        it.options.release.get().toString()
+                    } else if (it.sourceCompatibility != null) {
+                        it.sourceCompatibility
+                    } else {
+                        val compiler = it.javaCompiler.orNull
+                        if (compiler == null) {
+                            JavaVersion.current().toString()
+                        } else {
+                            compiler.metadata.languageVersion.asInt().toString()
+                        }
+                    }
+                })
+
+                it.outputDirectory.set(outputDir.map { d -> d.dir(set.name) })
+                it.remapLocations.set(remapOutputDir.map { d -> d.file("${it.name}.mappings") })
+
+                it.mappingCache.set(mappingsCache)
+                it.mappings.set(memoizedMappings)
+                migrateInPlace.get().directoryMappings.from(it.remapLocations)
+            }
+        }
+
+        target.tasks.register("migrateMappingsAll") {
+            it.group = "stellardrift"
+            it.description = "Remap all to official"
+            it.dependsOn(target.tasks.withType(RemapSourceSet::class))
         }
     }
 }
