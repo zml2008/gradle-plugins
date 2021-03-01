@@ -1,5 +1,3 @@
-import ca.stellardrift.build.common.configurate
-
 plugins {
     groovy
 }
@@ -18,12 +16,12 @@ tasks.processResources {
 
 dependencies {
     implementation(localGroovy())
-    api(platform(configurate("bom", "4.0.0")))
-    api(configurate("extra-kotlin"))
-    api(configurate("hocon"))
-    api(configurate("yaml"))
-    api(configurate("gson"))
-    api(configurate("xml"))
+    api(platform("org.spongepowered:configurate-bom:4.0.0"))
+    api("org.spongepowered:configurate-extra-kotlin")
+    api("org.spongepowered:configurate-hocon")
+    api("org.spongepowered:configurate-yaml")
+    api("org.spongepowered:configurate-gson")
+    api("org.spongepowered:configurate-xml")
 }
 
 indraPluginPublishing {

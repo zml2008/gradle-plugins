@@ -3,20 +3,31 @@ import com.gradle.publish.PluginBundleExtension
 plugins {
     kotlin("jvm") version "1.3.72" apply false // we must override what we're providing ourself... whoo circular dependencies
 
-    id("net.kyori.indra.publishing.gradle-plugin") version "1.3.1" apply false
-    id("ca.stellardrift.opinionated.kotlin") version "4.1" apply false
+    val indraVersion = "1.3.1"
+    id("net.kyori.indra") version indraVersion apply false
+    id("net.kyori.indra.license-header") version indraVersion apply false
+    id("net.kyori.indra.publishing.gradle-plugin") version indraVersion apply false
     id("com.github.ben-manes.versions") version "0.36.0"
 }
 
 group = "ca.stellardrift"
-version = "4.2-SNAPSHOT"
+version = "4.2"
 description = "A suite of plugins to apply defaults preferred for Stellardrift projects"
 
 subprojects {
     apply(plugin="java-gradle-plugin")
     apply(plugin="com.gradle.plugin-publish")
+    apply(plugin="net.kyori.indra")
     apply(plugin="net.kyori.indra.publishing.gradle-plugin")
-    apply(plugin="ca.stellardrift.opinionated.kotlin")
+    apply(plugin="org.jetbrains.kotlin.jvm")
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class) {
+        kotlinOptions {
+            languageVersion = "1.3"
+            freeCompilerArgs = freeCompilerArgs + listOf("-Xjvm-default=enable")
+            jvmTarget = "1.8"
+        }
+    }
 
     dependencies {
         val junitVersion: String by project
@@ -31,10 +42,6 @@ subprojects {
     repositories {
         mavenCentral()
         gradlePluginPortal()
-    }
-
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).configureEach {
-        kotlinOptions.languageVersion = "1.3"
     }
 
     extensions.configure(net.kyori.indra.IndraExtension::class) {
@@ -53,6 +60,9 @@ subprojects {
                 }
             }
         }
+
+        publishReleasesTo("stellardrift", "https://repo.stellardrift.ca/repository/releases/")
+        publishSnapshotsTo("stellardrift", "https://repo.stellardrift.ca/repository/snapshots/")
     }
 
     val pluginBundle = extensions.getByType(PluginBundleExtension::class).apply {

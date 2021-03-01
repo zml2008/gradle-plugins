@@ -32,3 +32,9 @@ indraPluginPublishing {
       """.trimIndent()
     )
 }
+
+publishing {
+    publications.withType(MavenPublication::class).configureEach {
+        this.suppressAllPomMetadataWarnings()
+    }
+}
