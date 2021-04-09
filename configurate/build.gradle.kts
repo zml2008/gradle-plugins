@@ -27,10 +27,10 @@ indraPluginPublishing {
         tags = listOf("configuration", "verification", "xml", "yaml", "hocon")
     )
     plugin(
-        id = "polyglot-dependencies",
-        mainClass = "ca.stellardrift.build.configurate.dependencies.PolyglotDependenciesPlugin",
-        description = "Additional file format support for the gradle 6.8 dependencies file",
-        displayName = "Polyglot Dependencies",
+        id = "polyglot-version-catalogs",
+        mainClass = "ca.stellardrift.build.configurate.catalog.PolyglotVersionCatalogPlugin",
+        description = "Additional file format support for the gradle 7.0 version catalog system",
+        displayName = "Polyglot Version Catalogs",
         tags = listOf("polyglot", "dependency-management", "xml", "yaml", "hocon")
     )
 }

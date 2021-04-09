@@ -17,12 +17,35 @@ package ca.stellardrift.build.configurate;
 
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
 
 import java.io.Reader;
+import java.util.function.UnaryOperator;
 
 /**
  * A provider for a configuration node, one half of a loader
  */
 public interface ConfigSource {
-    public ConfigurationNode read(final Reader reader) throws ConfigurateException;
+
+    /**
+     * Read a node from the provided reader.
+     *
+     * @param reader the reader to use
+     * @return a loaded node
+     * @throws ConfigurateException if any error occurs while loading
+     */
+    default ConfigurationNode read(final Reader reader) throws ConfigurateException {
+        return this.read(reader, UnaryOperator.identity());
+    }
+
+
+    /**
+     * Read a node from the provided reader.
+     *
+     * @param reader the reader to use
+     * @param optionsConfiguration an operator to tweak the options used in this source
+     * @return a loaded node
+     * @throws ConfigurateException if any error occurs while loading
+     */
+    ConfigurationNode read(final Reader reader, final UnaryOperator<ConfigurationOptions> optionsConfiguration) throws ConfigurateException;
 }

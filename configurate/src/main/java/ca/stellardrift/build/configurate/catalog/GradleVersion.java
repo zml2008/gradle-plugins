@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ca.stellardrift.build.configurate.dependencies;
+package ca.stellardrift.build.configurate.catalog;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.artifacts.MutableVersionConstraint;
@@ -31,19 +31,28 @@ import java.util.List;
         get = "*",
         jdkOnly = true,
         overshadowImplementation = true,
-        visibility = Value.Style.ImplementationVisibility.PACKAGE,
-        defaultAsDefault = true)
+        visibility = Value.Style.ImplementationVisibility.PACKAGE)
 interface GradleVersion {
+
+    static Builder builder() {
+        return new Builder();
+    }
+
     @Nullable String versionRef();
     @Nullable String require();
     @Nullable String strictly();
     @Nullable String prefer();
     List<String> rejectedVersions();
+    @Value.Default
     default boolean rejectAll() {
         return false;
     }
 
     default void applyTo(final MutableVersionConstraint spec) {
+        if (this.versionRef() != null) {
+            throw new IllegalStateException("Cannot apply a version reference (" + this.versionRef() + ") to a normal constraint!");
+        }
+
         if (this.require() != null) {
             spec.require(this.require());
         }
@@ -71,7 +80,11 @@ interface GradleVersion {
      * @return if complex version
      */
     default boolean complex() {
-        return !this.rejectedVersions().isEmpty() || this.versionRef() != null || this.rejectAll() || this.require() != null;
+        return !this.rejectedVersions().isEmpty()
+                || this.versionRef() != null
+                || this.rejectAll()
+                || (this.require() != null && (this.prefer() != null || this.strictly() != null))
+                || (this.prefer() != null && this.strictly() == null);
     }
 
     class Builder extends ImmutableGradleVersion.Builder {
@@ -120,8 +133,15 @@ interface GradleVersion {
             final int delimiter = strictSpec.indexOf(RICH_DELIMITER);
             if (delimiter == 0) {
                  // invalid
+                throw new SerializationException(GradleVersion.class, "A strict version must be in the form <strict>!![preferred]");
             } else if (delimiter == -1) {
                 builder.require(strictSpec);
+            } else {
+                final boolean hasPreferred = delimiter < strictSpec.length() - 2;
+                builder.strictly(strictSpec.substring(0, delimiter)); // we always have the strict component
+                if (hasPreferred) { // <strict>!!<preferred>
+                    builder.prefer(strictSpec.substring(delimiter + RICH_DELIMITER.length()));
+                }
             }
         }
 
@@ -133,7 +153,32 @@ interface GradleVersion {
             }
 
            if (node.isMap() || version.complex()) { // We're already a map, or we have data that can't be expressed as a scalar
+               node.node(VERSION_REF).set(version.versionRef());
+               node.node(REQUIRE).set(version.require());
+               node.node(PREFER).set(version.prefer());
+               node.node(STRICTLY).set(version.strictly());
+               final List<String> rejected = version.rejectedVersions();
+               if (rejected == null || rejected.isEmpty()) {
+                   node.node(REJECT).set(null);
+               } else {
+                   node.node(REJECT).set(rejected);
+               }
+               node.node(REJECT_ALL).set(version.rejectAll() ? true : null);
            } else {
+               // first case
+               final @Nullable String require = version.require();
+               // second case
+               final @Nullable String prefer = version.prefer();
+               final @Nullable String strictly = version.strictly();
+               if (require != null) {
+                   node.set(require);
+               } else {
+                   if (prefer != null) {
+                       node.set(strictly + RICH_DELIMITER + prefer);
+                   } else {
+                       node.set(strictly + RICH_DELIMITER);
+                   }
+               }
 
            }
 

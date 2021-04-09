@@ -18,6 +18,7 @@ package ca.stellardrift.build.configurate;
 import org.gradle.api.Action;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.loader.AbstractConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.util.UnmodifiableCollections;
@@ -28,6 +29,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import static java.util.Objects.requireNonNull;
 
@@ -49,7 +51,7 @@ public final class ConfigProcessor<B extends AbstractConfigurationLoader.Builder
     }
 
     @Override
-    public ConfigurationNode read(Reader reader) throws ConfigurateException {
+    public ConfigurationNode read(final Reader reader) throws ConfigurateException {
         requireNonNull(reader, "reader");
         final ConfigurationLoader<?> loader = this.builderMaker.get()
                 .source(() -> new BufferedReader(reader))
@@ -58,7 +60,17 @@ public final class ConfigProcessor<B extends AbstractConfigurationLoader.Builder
     }
 
     @Override
-    public void write(Writer destination, ConfigurationNode node) throws ConfigurateException {
+    public ConfigurationNode read(final Reader reader, final UnaryOperator<ConfigurationOptions> optionsModifier) throws ConfigurateException {
+        requireNonNull(reader, "reader");
+        final ConfigurationLoader<?> loader = this.builderMaker.get()
+                .defaultOptions(optionsModifier)
+                .source(() -> new BufferedReader(reader))
+                .build();
+        return loader.load();
+    }
+
+    @Override
+    public void write(final Writer destination, final ConfigurationNode node) throws ConfigurateException {
         requireNonNull(destination, "destination");
         requireNonNull(node, "node");
         final ConfigurationLoader<?> loader = this.builderMaker.get()

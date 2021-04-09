@@ -22,7 +22,7 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.Test;
 
 
-public class PolyglotDependenciesPluginTest {
+public class PolyglotVersionCatalogPluginTest {
 
     @Test
     public void testEmptyBuild() {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ca.stellardrift.build.configurate.dependencies;
+package ca.stellardrift.build.configurate.catalog;
 
 import io.leangen.geantyref.TypeFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -30,13 +30,13 @@ import java.util.Map;
 
 /**
  * Applies data from a configuration node to the Gradle model.
- *
  */
-public class VersionCatalogApplier {
+final class VersionCatalogApplier {
 
     private final VersionCatalogBuilder builder;
     private final PluginDependenciesSpec plugins;
 
+    private static final String METADATA = "metadata";
     private static final String DEPENDENCIES = "dependencies";
     private static final String BUNDLES = "bundles";
     private static final String PLUGINS = "plugins";
@@ -44,6 +44,7 @@ public class VersionCatalogApplier {
 
     private static final Type MAP_STRING_STRING = TypeFactory.parameterizedClass(Map.class, String.class, String.class);
     private static final Type MAP_STRING_LIST_STRING = TypeFactory.parameterizedClass(Map.class, String.class, TypeFactory.parameterizedClass(List.class, String.class));
+    private static final Type MAP_STRING_GRADLEVERSION = TypeFactory.parameterizedClass(Map.class, String.class, GradleVersion.class);
 
     public VersionCatalogApplier(final VersionCatalogBuilder builder, final PluginDependenciesSpec plugins) {
         this.builder = builder;
@@ -57,6 +58,11 @@ public class VersionCatalogApplier {
      * @throws SerializationException if information is provided in an invalid format
      */
     public void load(final ConfigurationNode node) throws SerializationException {
+        final ConfigurationNode metadata = node.node(METADATA);
+        if (!metadata.empty()) {
+            this.metadata(metadata);
+        }
+
         final ConfigurationNode dependencies = node.node(DEPENDENCIES);
         if (!dependencies.empty()) {
             this.dependencies(dependencies);
@@ -65,14 +71,26 @@ public class VersionCatalogApplier {
         if (!bundles.empty()) {
             this.bundles(bundles);
         }
-        final ConfigurationNode plugins = node.node(PLUGINS);
+
+        // Plugins have been removed from version catalogs, todo: re-add when Gradle does
+        /* final ConfigurationNode plugins = node.node(PLUGINS);
         if (!plugins.empty()) {
             this.plugins(plugins);
-        }
+        } */
+
         final ConfigurationNode versions = node.node(VERSIONS);
         if (!versions.empty()) {
             this.versions(versions);
         }
+    }
+
+    private void metadata(final ConfigurationNode metadata) throws SerializationException {
+       final String formatVersion = metadata.node("format", "version").getString();
+       if (formatVersion != null && !formatVersion.equals(PolyglotVersionCatalogPlugin.FORMAT_VERSION)) {
+           throw new SerializationException(metadata.parent(), VersionCatalogBuilder.class,
+               "A version catalog was provided with format version " + formatVersion
+                   + " but the polyglot catalog plugin only understands version " + PolyglotVersionCatalogPlugin.FORMAT_VERSION);
+       }
     }
 
     // A mapping of key to version spec
@@ -113,8 +131,9 @@ public class VersionCatalogApplier {
                     continue;
                 }
 
-                if (version.versionRef() != null) {
-                    build.versionRef(version.versionRef());
+                final @Nullable String versionRef = version.versionRef();
+                if (versionRef != null) {
+                    build.versionRef(versionRef);
                 } else {
                     build.version(version::applyTo);
                 }
@@ -125,7 +144,6 @@ public class VersionCatalogApplier {
                 }
                 this.builder.alias(alias).to(gav);
             }
-
         }
     }
 
@@ -152,7 +170,7 @@ public class VersionCatalogApplier {
 
     private void versions(final ConfigurationNode versions) throws SerializationException {
         if (!versions.isMap()) {
-            throw new SerializationException(versions, Map.class /* <String, GradleVersion> */, "Version references must be specified as a map of <ref id> => version specification");
+            throw new SerializationException(versions, MAP_STRING_GRADLEVERSION, "Version references must be specified as a map of <ref id> => version specification");
         }
 
         for (final Map.Entry<Object, ? extends ConfigurationNode> entry : versions.childrenMap().entrySet()) {

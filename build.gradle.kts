@@ -1,4 +1,5 @@
 import com.gradle.publish.PluginBundleExtension
+import org.cadixdev.gradle.licenser.LicenseExtension
 
 plugins {
     kotlin("jvm") version "1.4.10" apply false // we must override what we're providing ourself... whoo circular dependencies
@@ -18,6 +19,7 @@ subprojects {
     apply(plugin="java-gradle-plugin")
     apply(plugin="com.gradle.plugin-publish")
     apply(plugin="net.kyori.indra")
+    apply(plugin="net.kyori.indra.license-header")
     apply(plugin="net.kyori.indra.publishing.gradle-plugin")
     apply(plugin="org.jetbrains.kotlin.jvm")
 
@@ -48,6 +50,10 @@ subprojects {
             name = "stellardriftSnapshots"
             mavenContent { snapshotsOnly() }
         }
+    }
+
+    extensions.configure(LicenseExtension::class) {
+        header = rootProject.file("LICENSE_HEADER")
     }
 
     extensions.configure(net.kyori.indra.IndraExtension::class) {
