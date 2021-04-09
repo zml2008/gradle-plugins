@@ -1,7 +1,7 @@
 dependencies {
-    api("net.kyori:indra-common:1.3.1")
-    api("gradle.plugin.org.cadixdev.gradle:licenser:0.5.0")
-    api("org.jlleitschuh.gradle:ktlint-gradle:9.2.1")
+    api("net.kyori:indra-common:2.0.0-SNAPSHOT")
+    api("gradle.plugin.org.cadixdev.gradle:licenser:0.5.1")
+    api("org.jlleitschuh.gradle:ktlint-gradle:10.0.0")
 }
 
 indraPluginPublishing {

@@ -25,8 +25,7 @@ import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.configuration.providers.mappings.MojangMappingsDependency
 import net.fabricmc.loom.task.AbstractRunTask
 import net.fabricmc.loom.util.Constants
-import net.kyori.indra.extension as indraExtension
-import org.gradle.api.Action
+import net.kyori.indra.Indra
 import org.gradle.api.GradleException
 import org.gradle.api.IllegalDependencyNotation
 import org.gradle.api.JavaVersion
@@ -59,7 +58,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         apply(plugin = "com.github.fudge.forgedflowerloom")
 
         val minecraft = extensions.getByType<LoomGradleExtension>()
-        val indra = indraExtension(this)
+        val indra = Indra.extension(extensions)
 
         // Set up refmap
         minecraft.refmapName = "${project.name.toLowerCase(Locale.ROOT)}-refmap.json"
@@ -127,8 +126,8 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         // Set up in-place mappings migration
         configureInPlaceMappingMigration(this)
 
-        indra.includeJavaSoftwareComponentInPublications.set(false)
-        indra.configurePublications(Action {
+        indra.includeJavaSoftwareComponentInPublications(false)
+        indra.configurePublications {
             val remapJar = tasks["remapJar"]
             val remapSourcesJar = tasks["remapSourcesJar"]
             it.suppressAllPomMetadataWarnings()
@@ -142,7 +141,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
                 a.builtBy(remapSourcesJar)
             }
             it.artifact(tasks[mainSourceSet.get().javadocJarTaskName])
-        })
+        }
 
         afterEvaluate { proj ->
             // Automatically link to Fabric and Yarn JD
@@ -156,7 +155,7 @@ class OpinionatedFabricPlugin : Plugin<Project> {
                 }
 
             if (!depLinks.isEmpty()) {
-                proj.tasks.withType<Javadoc>().configureEach { jd ->
+                proj.tasks.withType(Javadoc::class).configureEach { jd ->
                     val options = jd.options
                     if (options is StandardJavadocDocletOptions) {
                         options.links?.addAll(depLinks)

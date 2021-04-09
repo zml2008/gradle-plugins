@@ -15,4 +15,4 @@
  */
 package ca.stellardrift.build.common
 
-internal const val VERSION_JUNIT_DEFAULT = "5.7.0"
+internal const val VERSION_JUNIT_DEFAULT = "5.7.1"

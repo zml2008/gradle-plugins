@@ -15,11 +15,12 @@
  */
 package ca.stellardrift.build.common
 
+import net.kyori.indra.repository.Repositories
 import java.util.Locale
-import net.kyori.indra.registerRepositoryExtensions
 import org.cadixdev.gradle.licenser.LicenseExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
@@ -51,7 +52,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             }
 
             // add useful repos
-            registerRepositoryExtensions(repositories, MINECRAFT_REPOSITORIES)
+            Repositories.registerRepositoryExtensions(repositories, MINECRAFT_REPOSITORIES)
 
             tasks.withType(JavaCompile::class.java) {
                 it.options.compilerArgs.add("-Xlint:-processing")
@@ -70,8 +71,11 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
 
             afterEvaluate {
                 if (extension.automaticModuleNames) {
-                    tasks.named<Jar>("jar").configure {
-                        it.manifest.attributes(mapOf("Automatic-Module-Name" to "$group.${name.replace("-", ".").toLowerCase(Locale.ROOT)}"))
+                    tasks.named(JavaPlugin.JAR_TASK_NAME, Jar::class).configure {
+                        it.manifest.attributes(mapOf(
+                            "Automatic-Module-Name"
+                                    to "$group.${name.replace("-", ".").toLowerCase(Locale.ROOT)}"
+                        ))
                     }
                 }
             }

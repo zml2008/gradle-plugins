@@ -15,48 +15,48 @@
  */
 package ca.stellardrift.build.common
 
-import net.kyori.indra.RemoteRepository
+import net.kyori.indra.repository.RemoteRepository
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 
 fun RepositoryHandler.cottonMc() = cottonMc.addTo(this)
-private val cottonMc = RemoteRepository("cottonMc", "https://server.bbkr.space/artifactory/libs-release", snapshots = false)
+private val cottonMc = RemoteRepository.releasesOnly("cottonMc", "https://server.bbkr.space/artifactory/libs-release")
 
 fun RepositoryHandler.engineHub() = engineHub.addTo(this)
-private val engineHub = RemoteRepository("engineHub", "https://maven.enginehub.org/repo/")
+private val engineHub = RemoteRepository.all("engineHub", "https://maven.enginehub.org/repo/")
 
 fun RepositoryHandler.minecraft() = minecraft.addTo(this)
-private val minecraft = RemoteRepository("minecraft", "https://libraries.minecraft.net/")
+private val minecraft = RemoteRepository.releasesOnly("minecraft", "https://libraries.minecraft.net/")
 
 fun RepositoryHandler.paper() = paper.addTo(this)
-private val paper = RemoteRepository("paper", "https://papermc.io/repo/repository/maven-public/")
+private val paper = RemoteRepository.all("paper", "https://papermc.io/repo/repository/maven-public/")
 
 fun RepositoryHandler.pex() = pex.addTo(this)
-private val pex = RemoteRepository("pex", "https://repo.glaremasters.me/repository/permissionsex/")
+private val pex = RemoteRepository.all("pex", "https://repo.glaremasters.me/repository/permissionsex/")
 
 fun RepositoryHandler.spigot() = spigot.addTo(this)
-private val spigot = RemoteRepository("spigot", "https://hub.spigotmc.org/nexus/content/groups/public/")
+private val spigot = RemoteRepository.all("spigot", "https://hub.spigotmc.org/nexus/content/groups/public/")
 
 fun RepositoryHandler.sponge() = sponge.addTo(this)
-private val sponge = RemoteRepository("sponge", "https://repo.spongepowered.org/repository/maven-public/")
+private val sponge = RemoteRepository.all("sponge", "https://repo.spongepowered.org/repository/maven-public/")
 
 fun RepositoryHandler.spongeReleases() = spongeReleases.addTo(this)
-private val spongeReleases = RemoteRepository("spongeReleases", "https://repo.spongepowered.org/repository/releases/", snapshots = false)
+private val spongeReleases = RemoteRepository.releasesOnly("spongeReleases", "https://repo.spongepowered.org/repository/releases/")
 
 fun RepositoryHandler.spongeSnapshots() = spongeSnapshots.addTo(this)
-private val spongeSnapshots = RemoteRepository("spongeSnapshots", "https://repo.spongepowered.org/repository/snapshots/", releases = false)
+private val spongeSnapshots = RemoteRepository.snapshotsOnly("spongeSnapshots", "https://repo.spongepowered.org/repository/snapshots/")
 
 fun RepositoryHandler.stellardriftReleases() = stellardriftReleases.addTo(this)
-private val stellardriftReleases = RemoteRepository("stellardriftReleases", "https://repo.stellardrift.ca/repository/stable/", snapshots = false)
+private val stellardriftReleases = RemoteRepository.releasesOnly("stellardriftReleases", "https://repo.stellardrift.ca/repository/stable/")
 
 fun RepositoryHandler.stellardriftSnapshots() = stellardriftSnapshots.addTo(this)
-private val stellardriftSnapshots = RemoteRepository("stellardriftSnapshots", "https://repo.stellardrift.ca/repository/snapshots/", releases = false)
+private val stellardriftSnapshots = RemoteRepository.snapshotsOnly("stellardriftSnapshots", "https://repo.stellardrift.ca/repository/snapshots/")
 
 fun RepositoryHandler.velocityReleases() = velocityReleases.addTo(this)
-private val velocityReleases = RemoteRepository("velocityReleases", "https://repo.velocitypowered.com/releases/", snapshots = false)
+private val velocityReleases = RemoteRepository.releasesOnly("velocityReleases", "https://repo.velocitypowered.com/releases/")
 
 fun RepositoryHandler.velocitySnapshots() = velocitySnapshots.addTo(this)
-private val velocitySnapshots = RemoteRepository("velocitySnapshots", "https://repo.velocitypowered.com/snapshots/", releases = false)
+private val velocitySnapshots = RemoteRepository.snapshotsOnly("velocitySnapshots", "https://repo.velocitypowered.com/snapshots/")
 
 internal val MINECRAFT_REPOSITORIES = listOf(
     sponge,

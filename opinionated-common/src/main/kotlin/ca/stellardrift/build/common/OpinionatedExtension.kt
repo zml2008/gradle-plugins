@@ -16,7 +16,6 @@
 package ca.stellardrift.build.common
 
 import net.kyori.indra.IndraExtension
-import net.kyori.indra.data.License
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 
@@ -28,21 +27,17 @@ open class OpinionatedExtension(objects: ObjectFactory) {
     var automaticModuleNames = false
 }
 
-fun IndraExtension.gpl3() = license.set(
-    License(
-        "GPL-3.0",
-        "GNU General Public License, Version 3",
-        "https://www.gnu.org/licenses/gpl-3.0.html"
-    )
-)
+fun IndraExtension.gpl3() = license {
+    it.spdx("GPL-3.0")
+        .name("GNU General Public License, Version 3")
+        .url("https://www.gnu.org/licenses/gpl-3.0.html")
+}
 
-fun IndraExtension.agpl3() = license.set(
-    License(
-        "AGPL-V3",
-        "GNU Affero General Public License, Version 3",
-        "https://www.gnu.org/licenses/agpl-3.0.html"
-    )
-)
+fun IndraExtension.agpl3() = license {
+    it.spdx("AGPL-V3")
+        .name("GNU Affero General Public License, Version 3")
+        .url("https://www.gnu.org/licenses/agpl-3.0.html")
+}
 
 internal const val EXTENSION_NAME = "opinionated"
 

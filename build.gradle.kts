@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "ca.stellardrift"
-version = "4.3-SNAPSHOT"
+version = "5.0.0-SNAPSHOT"
 description = "A suite of plugins to apply defaults preferred for Stellardrift projects"
 
 subprojects {
@@ -40,8 +40,14 @@ subprojects {
     }
 
     repositories {
-        mavenCentral()
-        gradlePluginPortal()
+        maven("https://repo.stellardrift.ca/repository/internal/") {
+            name = "stellardriftReleases"
+            mavenContent { releasesOnly() }
+        }
+        maven("https://repo.stellardrift.ca/repository/snapshots/") {
+            name = "stellardriftSnapshots"
+            mavenContent { snapshotsOnly() }
+        }
     }
 
     extensions.configure(net.kyori.indra.IndraExtension::class) {
