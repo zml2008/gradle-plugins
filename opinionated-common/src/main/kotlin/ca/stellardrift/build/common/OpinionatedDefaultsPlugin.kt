@@ -47,7 +47,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                     it.exclude {
                         it.file.startsWith(buildDir)
                     }
-                    it.header = headerFile
+                    it.header(headerFile)
                 }
             }
 
