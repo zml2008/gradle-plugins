@@ -18,11 +18,13 @@ package ca.stellardrift.build.configurate.catalog;
 import ca.stellardrift.build.configurate.ConfigSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.gradle.api.Action;
+import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.initialization.dsl.VersionCatalogBuilder;
 import org.gradle.api.initialization.resolve.DependencyResolutionManagement;
 import org.gradle.plugin.use.PluginDependenciesSpec;
 import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -143,10 +145,12 @@ public abstract class PolyglotVersionCatalogExtension {
             final VersionCatalogApplier app = new VersionCatalogApplier(builder, this.plugins);
             try (final BufferedReader reader = Files.newBufferedReader(this.file, StandardCharsets.UTF_8)) {
                 final ConfigurationNode node = this.source.read(
-                    reader,
-                    opts -> opts.serializers(serializers -> serializers.register(GradleVersion.class, GradleVersion.Serializer.INSTANCE))
+                        reader,
+                        opts -> opts.serializers(serializers -> serializers.register(GradleVersion.class, GradleVersion.Serializer.INSTANCE))
                 );
                 app.load(node);
+            } catch (final SerializationException ex) {
+                throw new InvalidUserDataException(ex.getMessage(), ex);
             } catch (final IOException ex) {
                 throw new RuntimeException("Unable to read versions catalog", ex);
             }

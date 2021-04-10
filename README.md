@@ -102,19 +102,19 @@ versions:
 # Declare dependencies to generate accessors for
 dependencies:
   # Dependencies using version references
-  junitApi: {group: &junit org.junit.jupiter, module: junit-jupiter-api, version: { ref: junit }}
-  junitEngine: {group: *junit, module: junit-jupiter-engine, version: { ref: junit }}
+  junitApi: {group: &junit org.junit.jupiter, name: junit-jupiter-api, version: { ref: junit }}
+  junitEngine: {group: *junit, name: junit-jupiter-engine, version: { ref: junit }}
 
   # Plain scalar
   assertj: org.assertj:assertj-core:3.19.0
 
   # Rich versions
-  asm: {group: org.ow2.asm, module: asm, version: {strictly: 9.1}}
+  asm: {module: "org.ow2.asm:asm", version: {strictly: 9.1}}
 
   # Using yaml anchors to declare versions 
-  configurateCore: {group: org.spongepowered, module: configurate-core, version: &configurate 4.0.0}
-  configurateHocon: {group: org.spongepowered, module: configurate-hocon, version: *configurate}
-  configurateYaml: {group: org.spongepowered, module: configurate-yaml, version: *configurate}
+  configurateCore: {group: org.spongepowered, name: configurate-core, version: &configurate 4.0.0}
+  configurateHocon: {group: org.spongepowered, name: configurate-hocon, version: *configurate}
+  configurateYaml: {group: org.spongepowered, name: configurate-yaml, version: *configurate}
 
 # Dependency bundles, with dependencies from those declared above 
 bundles:

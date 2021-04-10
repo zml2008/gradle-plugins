@@ -116,18 +116,22 @@ final class VersionCatalogApplier {
                     if (moduleInfo == null) {
                         throw new SerializationException(dep, VersionCatalogBuilder.LibraryAliasBuilder.class, "Either group and name, or module fields must be specified for an alias!");
                     }
+                    if (group != null || name != null) {
+                        throw new SerializationException(dep, VersionCatalogBuilder.LibraryAliasBuilder.class, "If the 'module' key is used, the 'group' and 'name' fields cannot be specified as they are redundant.");
+                    }
                     final String[] elements = moduleInfo.split(":");
                     if (elements.length == 3 && version == null) {
                         this.builder.alias(alias).to(moduleInfo);
                         continue;
                     } else if (elements.length < 2) {
-                        throw new SerializationException(dep, VersionCatalogBuilder.LibraryAliasBuilder.class, "A module specification must be in group:artifact[:version] format.");
+                        throw new SerializationException(dep, VersionCatalogBuilder.LibraryAliasBuilder.class, "A module specification must be in group:artifact[:version] format. To specify element separately, use the 'group' and 'name' keys in the map.");
                     }
                     build = this.builder.alias(alias).to(elements[0], elements[1]);
                 } else {
                     build = this.builder.alias(alias).to(group, name);
                 }
                 if (version == null) {
+                    build.withoutVersion();
                     continue;
                 }
 
