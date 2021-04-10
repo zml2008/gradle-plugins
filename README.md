@@ -68,6 +68,60 @@ Another mode is validation mode -- using the `ContentFilterable.validate` extens
 
 The plugin ships with handling for all of Configurate's built-in formats, but any others can be added by creating new instances of the `ConfigProcessor` class.
 
+
+## [Polyglot Version Catalog](https://plugins.gradle.org/plugin/ca.stellardrift.polyglot-version-catalogs)
+
+Add support for alternate languages to Gradle's new version catalog feature in 7.0.
+
+This plugin supports all Configurate languages: YAML, JSON, HOCON, and XML.
+
+Apply it in the `settings.gradle[.kts]`, and create a `gradle/libs.versions.{yaml,yml,conf,xml,json}` in the project.
+
+<details>
+<summary>Example</summary>
+
+**settings.gradle.kts**
+```kotlin
+plugins {
+    id("ca.stellardrift.polyglot-version-catalogs") version "5.0.0"
+}
+
+// [...]
+```
+
+**gradle/libs.dependencies.yml**
+```yaml
+# Basic format metadata
+metadata:
+  format: {version: 1.0}
+
+# Gradle-style version references
+versions:
+  junit: 5.7.1
+
+# Declare dependencies to generate accessors for
+dependencies:
+  # Dependencies using version references
+  junitApi: {group: &junit org.junit.jupiter, module: junit-jupiter-api, version: { ref: junit }}
+  junitEngine: {group: *junit, module: junit-jupiter-engine, version: { ref: junit }}
+
+  # Plain scalar
+  assertj: org.assertj:assertj-core:3.19.0
+
+  # Rich versions
+  asm: {group: org.ow2.asm, module: asm, version: {strictly: 9.1}}
+
+  # Using yaml anchors to declare versions 
+  configurateCore: {group: org.spongepowered, module: configurate-core, version: &configurate 4.0.0}
+  configurateHocon: {group: org.spongepowered, module: configurate-hocon, version: *configurate}
+  configurateYaml: {group: org.spongepowered, module: configurate-yaml, version: *configurate}
+
+# Dependency bundles, with dependencies from those declared above 
+bundles:
+  allJunit: [junitApi, junitEngine]
+```
+</details>
+
 ## Minecraft Dependencies (not actually a plugin)
 
 These are just a series of Kotlin extension functions that allow easily declaring common dependencies in the Minecraft ecosystem
