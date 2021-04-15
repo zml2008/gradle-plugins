@@ -94,6 +94,16 @@ plugins {
 # Basic format metadata
 metadata:
   format: {version: 1.0}
+  # Enable features added by this plugin
+  polyglot-extensions: [plugins]
+  
+# Declare versions for project plugins
+# This *does not* work for `settings` plugins.
+# Declarations here do not actually apply any plugins -- they simply provide default versions.
+plugins:
+  org.cadixdev.licenser: 0.5.1
+  com.github.ben-manes.versions: 0.38.0
+  com.github.johnrengelman.shadow: 6.1.0
 
 # Gradle-style version references
 versions:

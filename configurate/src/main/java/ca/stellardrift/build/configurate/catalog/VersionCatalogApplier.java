@@ -25,16 +25,15 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Applies data from a configuration node to the Gradle model.
  */
 final class VersionCatalogApplier {
-
-    private final VersionCatalogBuilder builder;
-    private final PluginDependenciesSpec plugins;
 
     private static final String METADATA = "metadata";
     private static final String DEPENDENCIES = "dependencies";
@@ -45,6 +44,10 @@ final class VersionCatalogApplier {
     private static final Type MAP_STRING_STRING = TypeFactory.parameterizedClass(Map.class, String.class, String.class);
     private static final Type MAP_STRING_LIST_STRING = TypeFactory.parameterizedClass(Map.class, String.class, TypeFactory.parameterizedClass(List.class, String.class));
     private static final Type MAP_STRING_GRADLEVERSION = TypeFactory.parameterizedClass(Map.class, String.class, GradleVersion.class);
+
+    private final VersionCatalogBuilder builder;
+    private final PluginDependenciesSpec plugins;
+    private final Set<FormatExtension> enabledExtensions = EnumSet.noneOf(FormatExtension.class);
 
     public VersionCatalogApplier(final VersionCatalogBuilder builder, final PluginDependenciesSpec plugins) {
         this.builder = builder;
@@ -67,16 +70,19 @@ final class VersionCatalogApplier {
         if (!dependencies.empty()) {
             this.dependencies(dependencies);
         }
+
         final ConfigurationNode bundles = node.node(BUNDLES);
         if (!bundles.empty()) {
             this.bundles(bundles);
         }
 
-        // Plugins have been removed from version catalogs, todo: re-add when Gradle does
-        /* final ConfigurationNode plugins = node.node(PLUGINS);
-        if (!plugins.empty()) {
-            this.plugins(plugins);
-        } */
+        // todo: if gradle re-adds these, remove them from a feature flag
+        if (this.enabledExtensions.contains(FormatExtension.PLUGINS)) {
+            final ConfigurationNode plugins = node.node(PLUGINS);
+            if (!plugins.empty()) {
+                this.plugins(plugins);
+            }
+        }
 
         final ConfigurationNode versions = node.node(VERSIONS);
         if (!versions.empty()) {
@@ -90,7 +96,10 @@ final class VersionCatalogApplier {
            throw new SerializationException(metadata.parent(), VersionCatalogBuilder.class,
                "A version catalog was provided with format version " + formatVersion
                    + " but the polyglot catalog plugin only understands version " + PolyglotVersionCatalogPlugin.FORMAT_VERSION);
+
        }
+
+       this.enabledExtensions.addAll(metadata.node("polyglot-extensions").getList(FormatExtension.class, Collections::emptyList));
     }
 
     // A mapping of key to version spec
@@ -103,7 +112,7 @@ final class VersionCatalogApplier {
             final String alias = String.valueOf(entry.getKey());
             final ConfigurationNode dep = entry.getValue();
 
-            if (dep.isMap()) {
+            if (dep.isMap()) { // TODO: read values from attributes in an AttributedConfigurationNode
                 final @Nullable String group = dep.node("group").getString();
                 @Nullable String name = dep.node("name").getString();
                 if (name == null && dep.hasChild("artifact")) {

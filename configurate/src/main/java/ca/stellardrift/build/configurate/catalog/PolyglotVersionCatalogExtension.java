@@ -21,7 +21,7 @@ import org.gradle.api.Action;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.initialization.dsl.VersionCatalogBuilder;
-import org.gradle.api.initialization.resolve.DependencyResolutionManagement;
+import org.gradle.api.initialization.resolve.MutableVersionCatalogContainer;
 import org.gradle.plugin.use.PluginDependenciesSpec;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -95,9 +95,12 @@ public abstract class PolyglotVersionCatalogExtension {
         Objects.requireNonNull(source, "source");
         Objects.requireNonNull(file, "file");
         final PluginDependenciesSpec plugins = this.settings.getPluginManagement().getPlugins();
-        final DependencyResolutionManagement drm = this.settings.getDependencyResolutionManagement();
-
-        drm.getVersionCatalogs().register(versionCatalog, new VersionCatalogBuilderConfigurationAction(source, file, plugins));
+        final MutableVersionCatalogContainer catalogs = this.settings.getDependencyResolutionManagement().getVersionCatalogs();
+        if (catalogs.getNames().contains(versionCatalog)) {
+            catalogs.named(versionCatalog, new VersionCatalogBuilderConfigurationAction(source, file, plugins));
+        } else {
+            catalogs.register(versionCatalog, new VersionCatalogBuilderConfigurationAction(source, file, plugins));
+        }
     }
 
     /**
