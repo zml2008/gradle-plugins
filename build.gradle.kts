@@ -4,7 +4,7 @@ import org.cadixdev.gradle.licenser.LicenseExtension
 plugins {
     kotlin("jvm") version "1.4.10" apply false // we must override what we're providing ourself... whoo circular dependencies
 
-    val indraVersion = "1.3.1"
+    val indraVersion = "2.0.0"
     id("net.kyori.indra") version indraVersion apply false
     id("net.kyori.indra.license-header") version indraVersion apply false
     id("net.kyori.indra.publishing.gradle-plugin") version indraVersion apply false
@@ -53,12 +53,12 @@ subprojects {
     }
 
     extensions.configure(LicenseExtension::class) {
-        header = rootProject.file("LICENSE_HEADER")
+        header(rootProject.file("LICENSE_HEADER"))
     }
 
     extensions.configure(net.kyori.indra.IndraExtension::class) {
         github("zml2008", "gradle-plugins") {
-            ci = true
+            ci(true)
         }
         apache2License()
 

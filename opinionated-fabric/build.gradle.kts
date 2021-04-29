@@ -22,10 +22,10 @@ dependencies {
 
 indraPluginPublishing {
     plugin(
-        id = "opinionated.fabric",
-        mainClass = "ca.stellardrift.build.fabric.OpinionatedFabricPlugin",
-        displayName = "Opinionated Fabric Defaults",
-        description = """
+        "opinionated.fabric",
+        "ca.stellardrift.build.fabric.OpinionatedFabricPlugin",
+        "Opinionated Fabric Defaults",
+        """
       Opinionated defaults for mods on the Fabric platform.
       
       Requires the https://maven.fabricmc.net plugin repository to be declared

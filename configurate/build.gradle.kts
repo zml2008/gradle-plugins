@@ -20,18 +20,18 @@ dependencies {
 
 indraPluginPublishing {
     plugin(
-        id = "configurate-transformations",
-        mainClass = "ca.stellardrift.build.configurate.transformations.ConfigurateTransformationsPlugin",
-        description = "File transformations for the Copy task using Configurate",
-        displayName = "Configurate Transformations",
-        tags = listOf("configuration", "verification", "xml", "yaml", "hocon")
+        "configurate-transformations",
+        "ca.stellardrift.build.configurate.transformations.ConfigurateTransformationsPlugin",
+        "File transformations for the Copy task using Configurate",
+        "Configurate Transformations",
+        listOf("configuration", "verification", "xml", "yaml", "hocon")
     )
     plugin(
-        id = "polyglot-version-catalogs",
-        mainClass = "ca.stellardrift.build.configurate.catalog.PolyglotVersionCatalogPlugin",
-        description = "Additional file format support for the gradle 7.0 version catalog system",
-        displayName = "Polyglot Version Catalogs",
-        tags = listOf("polyglot", "dependency-management", "xml", "yaml", "hocon")
+        "polyglot-version-catalogs",
+        "ca.stellardrift.build.configurate.catalog.PolyglotVersionCatalogPlugin",
+        "Additional file format support for the gradle 7.0 version catalog system",
+        "Polyglot Version Catalogs",
+        listOf("polyglot", "dependency-management", "xml", "yaml", "hocon")
     )
 }
 
