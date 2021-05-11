@@ -1,5 +1,5 @@
 dependencies {
-    api("net.kyori:indra-common:2.0.0")
+    api("net.kyori:indra-common:2.0.3")
     api("gradle.plugin.org.cadixdev.gradle:licenser:0.6.0")
 }
 

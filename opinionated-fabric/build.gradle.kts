@@ -9,7 +9,7 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation(project(":gradle-plugin-configurate"))
-    implementation("net.fabricmc:fabric-loom:0.6-SNAPSHOT")
+    implementation("net.fabricmc:fabric-loom:0.7-SNAPSHOT")
     implementation("io.github.fudge:forgedflowerloom:2.0.0")
 
     // In-place mapping migration implementation
