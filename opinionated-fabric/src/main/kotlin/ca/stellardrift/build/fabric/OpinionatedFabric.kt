@@ -24,6 +24,7 @@ import java.util.Locale
 import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.configuration.providers.mappings.MojangMappingsDependency
 import net.fabricmc.loom.task.AbstractRunTask
+import net.fabricmc.loom.task.RunGameTask
 import net.fabricmc.loom.util.Constants
 import net.kyori.indra.Indra
 import org.gradle.api.GradleException
@@ -79,7 +80,16 @@ class OpinionatedFabricPlugin : Plugin<Project> {
 
             it.from(testModSet.get().output)
         }
+
+        val unmappedMods = minecraft.unmappedModCollection
+        tasks.withType(AbstractRunTask::class.java) {
+            it.classpath(unmappedMods)
+        }
         minecraft.unmappedModCollection.from(testModJar)
+
+        /*minecraft.runConfigs.configureEach {
+            it.source(testModSet.name)
+        }*/
 
         applyMixinSourceSets(this, testModSet.get())
 
@@ -89,7 +99,6 @@ class OpinionatedFabricPlugin : Plugin<Project> {
         // Convert yaml files to josn
         tasks.withType(ProcessResources::class.java).configureEach {
             it.inputs.property("version", project.version)
-            it.filteringCharset = "UTF-8" // TODO: this is in indra v2
 
             // Convert data files yaml -> json
             it.filesMatching(
