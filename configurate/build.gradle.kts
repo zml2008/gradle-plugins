@@ -2,7 +2,7 @@ plugins {
     groovy
 }
 
-val configurateVersion = "4.0.0"
+val configurateVersion = "4.1.1"
 dependencies {
     implementation(localGroovy())
 
