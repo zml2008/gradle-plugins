@@ -4,7 +4,7 @@ import org.cadixdev.gradle.licenser.LicenseExtension
 plugins {
     kotlin("jvm") version "1.4.10" apply false // we must override what we're providing ourself... whoo circular dependencies
 
-    val indraVersion = "2.0.3"
+    val indraVersion = "2.0.4"
     id("net.kyori.indra") version indraVersion apply false
     id("net.kyori.indra.license-header") version indraVersion apply false
     id("net.kyori.indra.publishing.gradle-plugin") version indraVersion apply false
