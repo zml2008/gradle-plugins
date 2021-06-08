@@ -174,8 +174,9 @@ class LocalizationPlugin : Plugin<Project> {
                     else -> {
                         // no-op
                     }
-                }*/
+                }
                 it.resources.srcDir(task.map { t -> t.resourceBundleSources })
+                 */
             }
         }
     }
