@@ -17,6 +17,7 @@ package ca.stellardrift.build.configurate.catalog;
 
 import ca.stellardrift.build.configurate.ConfigFormats;
 import ca.stellardrift.build.configurate.ConfigProcessor;
+import ca.stellardrift.build.configurate.GradleVersionUtil;
 import org.gradle.api.Plugin;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.logging.Logger;
@@ -46,8 +47,10 @@ public class PolyglotVersionCatalogPlugin implements Plugin<Settings> {
         final PolyglotVersionCatalogExtension deps = target.getExtensions()
                 .create("deps", PolyglotVersionCatalogExtension.class, target);
 
-        target.enableFeaturePreview("VERSION_CATALOGS"); // version catalogs are a feature preview -- we assume they'll want to be
-                                                               // enabled since we're in a plugin that uses them
+        if (!GradleVersionUtil.VERSION_CATALOGS_STABLE) {
+            // enable version catalogs on versions where it's a feature preview - we assume this is wanted when applying a plugin based around the feature
+            target.enableFeaturePreview("VERSION_CATALOGS");
+        }
 
         // Register a listener to register the dependencies for the first available format found, after evaluating the Settings
         target.getGradle().settingsEvaluated(settings -> {

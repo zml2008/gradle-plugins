@@ -15,6 +15,7 @@
  */
 package ca.stellardrift.build.configurate.catalog;
 
+import ca.stellardrift.build.configurate.GradleVersionUtil;
 import io.leangen.geantyref.TypeFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.InvalidUserDataException;
@@ -130,14 +131,14 @@ final class VersionCatalogApplier {
                     }
                     final String[] elements = moduleInfo.split(":");
                     if (elements.length == 3 && version == null) {
-                        this.builder.alias(alias).to(moduleInfo);
+                        this.library(alias, moduleInfo);
                         continue;
                     } else if (elements.length < 2) {
                         throw new SerializationException(dep, VersionCatalogBuilder.LibraryAliasBuilder.class, "A module specification must be in group:artifact[:version] format. To specify element separately, use the 'group' and 'name' keys in the map.");
                     }
-                    build = this.builder.alias(alias).to(elements[0], elements[1]);
+                    build = this.library(alias, elements[0], elements[1]);
                 } else {
-                    build = this.builder.alias(alias).to(group, name);
+                    build = this.library(alias, group, name);
                 }
                 if (version == null) {
                     build.withoutVersion();
@@ -155,8 +156,26 @@ final class VersionCatalogApplier {
                 if (gav == null) {
                     throw new SerializationException(dep, String.class, "Unable to get a String or Map value for a dependency");
                 }
-                this.builder.alias(alias).to(gav);
+                this.library(alias, gav);
             }
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void library(final String alias, final String gav) {
+        if (GradleVersionUtil.VERSION_CATALOGS_STABLE) {
+            this.builder.library(alias, gav);
+        } else {
+            this.builder.alias(alias).to(gav);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private VersionCatalogBuilder.LibraryAliasBuilder library(final String alias, final String group, final String name) {
+        if (GradleVersionUtil.VERSION_CATALOGS_STABLE) {
+            return this.builder.library(alias, group, name);
+        } else {
+            return this.builder.alias(alias).to(group, name);
         }
     }
 

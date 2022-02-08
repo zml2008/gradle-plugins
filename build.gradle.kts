@@ -2,13 +2,13 @@ import com.gradle.publish.PluginBundleExtension
 import org.cadixdev.gradle.licenser.LicenseExtension
 
 plugins {
-    kotlin("jvm") version "1.4.10" apply false // we must override what we're providing ourself... whoo circular dependencies
+    kotlin("jvm") version "1.5.31" apply false // we must override what we're providing ourself... whoo circular dependencies
 
-    val indraVersion = "2.0.5"
+    val indraVersion = "2.1.1"
     id("net.kyori.indra") version indraVersion apply false
     id("net.kyori.indra.license-header") version indraVersion apply false
     id("net.kyori.indra.publishing.gradle-plugin") version indraVersion apply false
-    id("com.github.ben-manes.versions") version "0.38.0"
+    id("com.github.ben-manes.versions") version "0.42.0"
 }
 
 group = "ca.stellardrift"
