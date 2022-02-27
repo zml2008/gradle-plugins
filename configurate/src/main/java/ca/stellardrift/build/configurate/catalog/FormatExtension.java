@@ -24,7 +24,7 @@ public enum FormatExtension {
     /**
      * Allow using the {@code plugins} section to declare plugins versions.
      *
-     * <p>Plugin versions declared this way <strong>will not</strong> be available in the {@code settings.gradle.kts}.</p>
+     * <p>Plugin versions declared this way <strong>will not</strong> be available in the {@code settings.gradle[.kts]}.</p>
      */
     PLUGINS
 }

@@ -15,6 +15,8 @@
  */
 package ca.stellardrift.build.configurate;
 
+import static java.util.Objects.requireNonNull;
+
 import org.gradle.api.Action;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -31,10 +33,11 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import static java.util.Objects.requireNonNull;
-
 /**
- * An operator that can both read and write configurations
+ * An operator that can both read and write configurations.
+ *
+ * @param <B> builder type
+ * @param <L> loader type
  */
 public final class ConfigProcessor<B extends AbstractConfigurationLoader.Builder<B, L>, L extends AbstractConfigurationLoader<?>> implements ConfigSource, ConfigTarget {
     private final Supplier<B> builderMaker;

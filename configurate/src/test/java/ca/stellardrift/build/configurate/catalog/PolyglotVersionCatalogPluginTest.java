@@ -13,14 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ca.stellardrift.build.configurate.dependencies;
+package ca.stellardrift.build.configurate.catalog;
 
-import org.gradle.api.Project;
-import org.gradle.api.invocation.Gradle;
-import org.gradle.testfixtures.ProjectBuilder;
-import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.Test;
-
 
 public class PolyglotVersionCatalogPluginTest {
 

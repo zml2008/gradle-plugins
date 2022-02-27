@@ -1,14 +1,15 @@
 plugins {
     groovy
+    id("com.diffplug.eclipse.apt") version "3.35.0"
 }
 
-val configurateVersion = "4.1.1"
+val configurateVersion = "4.1.2"
 dependencies {
     implementation(localGroovy())
 
-    compileOnlyApi("org.immutables:value:2.8.8:annotations")
-    compileOnlyApi("org.immutables:builder:2.8.8")
-    annotationProcessor("org.immutables:value:2.8.8")
+    compileOnlyApi("org.immutables:value:2.9.0:annotations")
+    compileOnlyApi("org.immutables:builder:2.9.0")
+    annotationProcessor("org.immutables:value:2.9.0")
 
     api(platform("org.spongepowered:configurate-bom:$configurateVersion"))
     api("org.spongepowered:configurate-extra-kotlin")

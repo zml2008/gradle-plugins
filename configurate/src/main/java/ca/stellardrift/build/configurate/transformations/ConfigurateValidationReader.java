@@ -18,7 +18,11 @@ package ca.stellardrift.build.configurate.transformations;
 import ca.stellardrift.build.configurate.ConfigSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.io.*;
+import java.io.FilterReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
 public class ConfigurateValidationReader extends FilterReader {
@@ -47,7 +51,7 @@ public class ConfigurateValidationReader extends FilterReader {
             int read = this.original.read(buffer);
             while (read != -1) {
                 writer.write(buffer, 0, read);
-                read = original.read(buffer);
+                read = this.original.read(buffer);
             }
         }
 

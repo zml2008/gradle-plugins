@@ -7,3 +7,11 @@
 
 # Ignore IntelliJ workspace files
 /.idea
+
+# Eclipse
+.settings/
+.classpath
+.factorypath
+.project
+*/.apt_generated/
+*/.apt_generated_tests/
