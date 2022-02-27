@@ -15,7 +15,10 @@ dependencies {
     api("org.spongepowered:configurate-extra-kotlin")
     api("org.spongepowered:configurate-hocon")
     api("org.spongepowered:configurate-yaml")
-    api("org.spongepowered:configurate-gson")
+    api("org.spongepowered:configurate-gson") {
+        exclude(group = "com.google.code.gson", module = "gson")
+    }
+    implementation("com.google.code.gson:gson:2.9.0")
     api("org.spongepowered:configurate-xml")
 }
 
