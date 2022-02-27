@@ -56,7 +56,6 @@ class OpinionatedFabricPlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {
         apply(plugin = "ca.stellardrift.opinionated")
         apply(plugin = "fabric-loom")
-        apply(plugin = "com.github.fudge.forgedflowerloom")
 
         val minecraft = extensions.getByType<LoomGradleExtension>()
         val indra = Indra.extension(extensions)

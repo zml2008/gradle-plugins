@@ -10,7 +10,6 @@ dependencies {
     }
     implementation(project(":gradle-plugin-configurate"))
     implementation("net.fabricmc:fabric-loom:0.7-SNAPSHOT")
-    implementation("io.github.fudge:forgedflowerloom:2.0.0")
 
     // In-place mapping migration implementation
     implementation("org.cadixdev:mercury:0.1.0-rc1")
