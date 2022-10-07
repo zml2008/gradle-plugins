@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 zml
+ * Copyright 2020-2022 zml
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package ca.stellardrift.build.common
 
-import net.kyori.indra.repository.Repositories
+import com.diffplug.gradle.spotless.FormatExtension
+import com.diffplug.gradle.spotless.SpotlessExtension
+import net.kyori.indra.licenser.spotless.IndraSpotlessLicenserExtension
 import java.util.Locale
-import org.cadixdev.gradle.licenser.LicenseExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
@@ -36,22 +37,51 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
 
             plugins.apply {
                 apply("net.kyori.indra")
+                apply("ca.stellardrift.repository")
+                apply("com.diffplug.spotless")
             }
 
             val headerFile = rootProject.file("LICENSE_HEADER")
             if (headerFile.isFile) {
-                apply(plugin = "net.kyori.indra.license-header")
+                apply(plugin = "net.kyori.indra.licenser.spotless")
 
-                extensions.configure(LicenseExtension::class.java) {
-                    it.exclude {
-                        it.file.startsWith(buildDir)
-                    }
-                    it.header(headerFile)
+                extensions.configure(IndraSpotlessLicenserExtension::class.java) {
+                    it.licenseHeaderFile(headerFile)
                 }
             }
 
-            // add useful repos
-            Repositories.registerRepositoryExtensions(repositories, MINECRAFT_REPOSITORIES)
+            extensions.configure(SpotlessExtension::class.java) { spotless ->
+                fun FormatExtension.commonOptions() {
+                    endWithNewline()
+                    trimTrailingWhitespace()
+                    toggleOffOn("formatter:off", "formatter:on")
+                    // todo: indent?
+                }
+                val importOrder = arrayOf("", "#")
+
+                spotless.java {
+                    it.commonOptions()
+                    it.importOrder(*importOrder)
+                    it.formatAnnotations()
+                }
+
+                plugins.withId("groovy") {
+                    spotless.java {
+                        it.target("src/*/java/**/*.java", "src/*/groovy/**/*.java")
+                    }
+                    spotless.groovy {
+                        it.excludeJava()
+                        it.commonOptions()
+                        it.importOrder(*importOrder)
+                    }
+                }
+
+                plugins.withId("org.jetbrains.kotlin.jvm") {
+                    spotless.kotlin {
+                        it.commonOptions()
+                    }
+                }
+            }
 
             tasks.withType(JavaCompile::class.java) {
                 it.options.compilerArgs.add("-Xlint:-processing")

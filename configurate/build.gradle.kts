@@ -7,9 +7,9 @@ val configurateVersion = "4.1.2"
 dependencies {
     implementation(localGroovy())
 
-    compileOnlyApi("org.immutables:value:2.9.0:annotations")
-    compileOnlyApi("org.immutables:builder:2.9.0")
-    annotationProcessor("org.immutables:value:2.9.0")
+    compileOnlyApi("org.immutables:value:2.9.2:annotations")
+    compileOnlyApi("org.immutables:builder:2.9.2")
+    annotationProcessor("org.immutables:value:2.9.2")
 
     api(platform("org.spongepowered:configurate-bom:$configurateVersion"))
     api("org.spongepowered:configurate-extra-kotlin")
@@ -18,7 +18,7 @@ dependencies {
     api("org.spongepowered:configurate-gson") {
         exclude(group = "com.google.code.gson", module = "gson")
     }
-    implementation("com.google.code.gson:gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.9.1")
     api("org.spongepowered:configurate-xml")
 }
 
@@ -40,12 +40,6 @@ indraPluginPublishing {
 }
 
 tasks {
-    withType(GroovyCompile::class) {
-        options.release.set(8)
-        sourceCompatibility = "1.8"
-        targetCompatibility = "1.8"
-    }
-
     processResources {
         inputs.property("version", project.version)
 

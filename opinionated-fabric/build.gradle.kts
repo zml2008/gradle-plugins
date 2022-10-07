@@ -1,9 +1,3 @@
-repositories {
-    maven(url = "https://maven.fabricmc.net/") {
-        name = "fabric"
-    }
-}
-
 dependencies {
     implementation(project(":gradle-plugin-opinionated-common")) {
         exclude(group = "org.jetbrains.kotlin")

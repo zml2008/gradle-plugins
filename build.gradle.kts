@@ -1,33 +1,36 @@
-import com.gradle.publish.PluginBundleExtension
-import org.cadixdev.gradle.licenser.LicenseExtension
+import com.diffplug.gradle.spotless.SpotlessExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    kotlin("jvm") version "1.5.31" apply false // we must override what we're providing ourself... whoo circular dependencies
+    kotlin("jvm") version "1.7.20" apply false // we must override what we're providing ourself... whoo circular dependencies
 
-    val indraVersion = "2.1.1"
+    val indraVersion = "3.0.0"
     id("net.kyori.indra") version indraVersion apply false
-    id("net.kyori.indra.license-header") version indraVersion apply false
+    id("net.kyori.indra.licenser.spotless") version indraVersion apply false
     id("net.kyori.indra.publishing.gradle-plugin") version indraVersion apply false
-    id("com.github.ben-manes.versions") version "0.42.0"
 }
 
 group = "ca.stellardrift"
-version = "5.0.2-SNAPSHOT"
+version = "6.0.0-SNAPSHOT"
 description = "A suite of plugins to apply defaults preferred for Stellardrift projects"
 
 subprojects {
     apply(plugin="java-gradle-plugin")
     apply(plugin="com.gradle.plugin-publish")
     apply(plugin="net.kyori.indra")
-    apply(plugin="net.kyori.indra.license-header")
+    apply(plugin="net.kyori.indra.licenser.spotless")
     apply(plugin="net.kyori.indra.publishing.gradle-plugin")
     apply(plugin="org.jetbrains.kotlin.jvm")
 
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class) {
-        kotlinOptions {
-            languageVersion = "1.3"
-            freeCompilerArgs = freeCompilerArgs + listOf("-Xjvm-default=enable")
-            jvmTarget = "1.8"
+    extensions.configure(KotlinJvmProjectExtension::class) {
+        coreLibrariesVersion = "1.5.31"
+        target {
+            compilations.configureEach {
+                kotlinOptions {
+                    languageVersion = "1.3"
+                    freeCompilerArgs = freeCompilerArgs + listOf("-Xjvm-default=all")
+                }
+            }
         }
     }
 
@@ -35,25 +38,19 @@ subprojects {
         val junitVersion: String by project
         "implementation"(gradleKotlinDsl())
 
-        "testImplementation"(kotlin("test", embeddedKotlinVersion))
-        "testImplementation"(kotlin("test-junit5", embeddedKotlinVersion))
+        "testImplementation"(kotlin("test"))
+        "testImplementation"(kotlin("test-junit5"))
         "testImplementation"("org.junit.jupiter:junit-jupiter-api:$junitVersion")
         "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+        "implementation"("net.kyori:mammoth:1.3.0-SNAPSHOT")
     }
 
-    repositories {
-        maven("https://repo.stellardrift.ca/repository/internal/") {
-            name = "stellardriftReleases"
-            mavenContent { releasesOnly() }
-        }
-        maven("https://repo.stellardrift.ca/repository/snapshots/") {
-            name = "stellardriftSnapshots"
-            mavenContent { snapshotsOnly() }
-        }
+    extensions.configure(net.kyori.indra.licenser.spotless.IndraSpotlessLicenserExtension::class) {
+        licenseHeaderFile(rootProject.file("LICENSE_HEADER"))
     }
 
-    extensions.configure(LicenseExtension::class) {
-        header(rootProject.file("LICENSE_HEADER"))
+    extensions.configure(SpotlessExtension::class) {
+        ratchetFrom("origin/dev")
     }
 
     extensions.configure(net.kyori.indra.IndraExtension::class) {
@@ -77,9 +74,9 @@ subprojects {
         publishSnapshotsTo("stellardrift", "https://repo.stellardrift.ca/repository/snapshots/")
     }
 
-    val pluginBundle = extensions.getByType(PluginBundleExtension::class).apply {
-        website = "https://github.com/zml2008/gradle-plugins"
-        tags = listOf("minecraft", "opinionated", "defaults")
+    extensions.configure(net.kyori.indra.gradle.IndraPluginPublishingExtension::class) {
+        website("https://github.com/zml2008/gradle-plugins")
+        bundleTags("minecraft", "opinionated", "defaults")
     }
 }
 

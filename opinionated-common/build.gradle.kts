@@ -1,6 +1,7 @@
 dependencies {
-    api("net.kyori:indra-common:2.0.5")
-    api("gradle.plugin.org.cadixdev.gradle:licenser:0.6.0")
+    api("net.kyori:indra-common:3.0.0")
+    api("net.kyori:indra-licenser-spotless:3.0.0")
+    api(project(":gradle-plugin-stellardrift-repository"))
 }
 
 indraPluginPublishing {
