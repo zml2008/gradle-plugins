@@ -18,8 +18,13 @@ dependencyResolutionManagement {
 
 rootProject.name = "gradle-plugins"
 
-listOf("opinionated-common", "opinionated-fabric", "opinionated-kotlin",
-      "localization", "templating", "configurate", "stellardrift-repository").forEach {
+listOf(
+    "opinionated-common",
+    "localization",
+    "templating",
+    "configurate",
+    "stellardrift-repository"
+).forEach {
   include(":$it")
   findProject(":$it")?.name = "gradle-plugin-$it"
 }
