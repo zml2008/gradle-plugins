@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 zml
+ * Copyright 2020-2022 zml
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,11 @@ package ca.stellardrift.build.configurate.catalog;
  */
 public enum FormatExtension {
     /**
-     * Allow using the {@code plugins} section to declare plugins versions.
+     * Uses the {@code plugins} section to declare plugins versions in the pre-official support manner.
      *
      * <p>Plugin versions declared this way <strong>will not</strong> be available in the {@code settings.gradle[.kts]}.</p>
+     *
+     * @deprecated since 6.0.0, now that Gradle officially supports plugin specification
      */
     PLUGINS
 }

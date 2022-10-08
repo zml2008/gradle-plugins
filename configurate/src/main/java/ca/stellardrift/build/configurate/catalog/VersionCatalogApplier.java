@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 zml
+ * Copyright 2020-2022 zml
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@ package ca.stellardrift.build.configurate.catalog;
 
 import ca.stellardrift.build.configurate.GradleVersionUtil;
 import io.leangen.geantyref.TypeFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.gradle.api.InvalidUserDataException;
-import org.gradle.api.initialization.dsl.VersionCatalogBuilder;
-import org.gradle.plugin.use.PluginDependenciesSpec;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.serialize.SerializationException;
-
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.initialization.dsl.VersionCatalogBuilder;
+import org.gradle.plugin.use.PluginDependenciesSpec;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 /**
  * Applies data from a configuration node to the Gradle model.
@@ -41,6 +41,8 @@ final class VersionCatalogApplier {
     private static final String BUNDLES = "bundles";
     private static final String PLUGINS = "plugins";
     private static final String VERSIONS = "versions";
+
+    private static final Pattern COLON = Pattern.compile(":", Pattern.LITERAL);
 
     private static final Type MAP_STRING_STRING = TypeFactory.parameterizedClass(Map.class, String.class, String.class);
     private static final Type MAP_STRING_LIST_STRING = TypeFactory.parameterizedClass(Map.class, String.class, TypeFactory.parameterizedClass(List.class, String.class));
@@ -77,10 +79,11 @@ final class VersionCatalogApplier {
             this.bundles(bundles);
         }
 
-        // todo: if gradle re-adds these, remove them from a feature flag
-        if (this.enabledExtensions.contains(FormatExtension.PLUGINS)) {
-            final ConfigurationNode plugins = node.node(PLUGINS);
-            if (!plugins.empty()) {
+        final ConfigurationNode plugins = node.node(PLUGINS);
+        if (!plugins.empty()) {
+            if (this.enabledExtensions.contains(FormatExtension.PLUGINS)) {
+                this.legacyPlugins(plugins);
+            } else {
                 this.plugins(plugins);
             }
         }
@@ -191,11 +194,40 @@ final class VersionCatalogApplier {
     }
 
     // A map of String plugin id => String version
-    private void plugins(final ConfigurationNode plugins) throws SerializationException {
+    private void legacyPlugins(final ConfigurationNode plugins) throws SerializationException {
         if (!plugins.isMap()) {
             throw new SerializationException(plugins, MAP_STRING_STRING, "Plugins must be specified as a map of id => version");
         }
         for (final Map.Entry<Object, ? extends ConfigurationNode> entry : plugins.childrenMap().entrySet()) {
+            this.plugins.id(String.valueOf(entry.getKey())).version(entry.getValue().get(String.class));
+        }
+    }
+
+    private void plugins(final ConfigurationNode plugins) throws SerializationException {
+        if (!plugins.isMap()) {
+            throw new SerializationException(plugins, Map.class, "Plugins must be specified as a map of alias => version");
+        }
+        for (final Map.Entry<Object, ? extends ConfigurationNode> entry : plugins.childrenMap().entrySet()) {
+            final String alias = String.valueOf(entry.getKey());
+            if (entry.getValue().isMap()) {
+                final String id = entry.getValue().node("id").require(String.class);
+                final @Nullable GradleVersion version = entry.getValue().node("version").get(GradleVersion.class);
+                final VersionCatalogBuilder.PluginAliasBuilder plugin = this.builder.plugin(alias, id);
+                if (version != null) {
+                    if (version.versionRef() != null) {
+                        plugin.versionRef(version.versionRef());
+                    } else {
+                        plugin.version(version::applyTo);
+                    }
+                }
+            } else {
+                final String[] split = COLON.split(entry.getValue().getString(), -1);
+                if (split.length == 1) {
+                    this.builder.plugin(alias, split[0]);
+                } else if (split.length == 2) {
+                    this.builder.plugin(alias, split[0]).version(split[1]);
+                }
+            }
             this.plugins.id(String.valueOf(entry.getKey())).version(entry.getValue().get(String.class));
         }
     }
