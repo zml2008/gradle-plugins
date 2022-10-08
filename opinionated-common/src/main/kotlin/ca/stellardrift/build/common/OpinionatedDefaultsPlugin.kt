@@ -17,8 +17,8 @@ package ca.stellardrift.build.common
 
 import com.diffplug.gradle.spotless.FormatExtension
 import com.diffplug.gradle.spotless.SpotlessExtension
-import net.kyori.indra.licenser.spotless.IndraSpotlessLicenserExtension
 import java.util.Locale
+import net.kyori.indra.licenser.spotless.IndraSpotlessLicenserExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
@@ -57,7 +57,7 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                     toggleOffOn("formatter:off", "formatter:on")
                     // todo: indent?
                 }
-                val importOrder = arrayOf("", "#")
+                val importOrder = arrayOf("", "\\#")
 
                 spotless.java {
                     it.commonOptions()
@@ -101,10 +101,12 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
             afterEvaluate {
                 if (extension.automaticModuleNames) {
                     tasks.named(JavaPlugin.JAR_TASK_NAME, Jar::class).configure {
-                        it.manifest.attributes(mapOf(
-                            "Automatic-Module-Name"
+                        it.manifest.attributes(
+                            mapOf(
+                                "Automatic-Module-Name"
                                     to "$group.${name.replace("-", ".").toLowerCase(Locale.ROOT)}"
-                        ))
+                            )
+                        )
                     }
                 }
             }

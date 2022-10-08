@@ -15,11 +15,10 @@
  */
 package ca.stellardrift.build.repository;
 
+import javax.inject.Inject;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor;
-
-import javax.inject.Inject;
 
 class StellardriftRepositoryExtensionImpl implements StellardriftRepositoryExtension {
     private static final String BASE_URL = "https://repo.stellardrift.ca/repository/";

@@ -51,6 +51,27 @@ subprojects {
 
     extensions.configure(SpotlessExtension::class) {
         ratchetFrom("origin/dev")
+        fun com.diffplug.gradle.spotless.FormatExtension.commonOptions() {
+            endWithNewline()
+            trimTrailingWhitespace()
+        }
+        java {
+            commonOptions()
+            removeUnusedImports()
+            importOrder("", "\\#")
+        }
+
+        kotlin {
+            commonOptions()
+            ktlint("0.47.1")
+                .editorConfigOverride(mapOf("ij_kotlin_imports_layout" to "*"))
+        }
+
+        kotlinGradle {
+            commonOptions()
+            ktlint("0.47.1")
+                .editorConfigOverride(mapOf("ij_kotlin_imports_layout" to "*"))
+        }
     }
 
     extensions.configure(net.kyori.indra.IndraExtension::class) {

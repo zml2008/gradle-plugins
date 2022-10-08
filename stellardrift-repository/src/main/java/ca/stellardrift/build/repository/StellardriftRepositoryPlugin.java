@@ -16,12 +16,9 @@
 package ca.stellardrift.build.repository;
 
 import net.kyori.mammoth.ProjectOrSettingsPlugin;
-import org.gradle.api.GradleException;
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.initialization.Settings;
-import org.gradle.api.invocation.Gradle;
 import org.gradle.api.plugins.ExtensionAware;
 import org.gradle.util.GradleVersion;
 import org.jetbrains.annotations.Nullable;
