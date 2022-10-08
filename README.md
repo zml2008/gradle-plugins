@@ -16,24 +16,6 @@ This builds on top of the [indra] plugin, doing the following:
 - If a checkstyle configuration is present at `$rootProject/.checkstyle/checkstyle.xml`, configures the checkstyle plugin to use it
 - Applies [ktlint](https://github.com/JLLeitschuh/ktlint-gradle) plugin to lint Gradle kotlin build files
 
-## [Opinionated Kotlin Defaults](https://plugins.gradle.org/plugin/ca.stellardrift.opinionated.kotlin)
-
-Applies a few settings specific to Kotlin JVM projects, and brings in standard opinionated defaults.
-
-- Set the language level to whatever is chosen for Java
-- Enable use of JvmDefault on interface methods
-- Inherits `ktlint` plugin from opinionated plugin to enforce standard formatting
-
-## [Opinionated Fabric Defaults](https://plugins.gradle.org/plugin/ca.stellardrift.opinionated.fabric)
-**Note:** Requires the Fabric maven repository to be added to the `settings.gradle.kts`
-
-- Applies the Fabric Loom plugin.
-- Applies the ForgedFlowerLoom plugin.
-- Sets up a `testmod` source set for a test mod that is loaded in the Gradle run tasks
-- Sets up `mixin` and `accessor` source sets, and removes the Mixin AP from the main source set.
-- Configures any Javadoc generation tasks to link to the appropriate versions of Yarn and Fabric API javadocs.
-- Configures Javadoc tasks to support the Mixin `@reason` Javadoc tag
-
 ## [Localization](https://plugins.gradle.org/plugin/ca.stellardrift.localization)
 
 Using a single template, generate source files to more reliably access strings contained in resources bundles in the `src/<set>/messages` root. Currently supports automatically configuring compile tasks for Java and Kotlin. A messages class template in GString format must be provided. This template will get the following parameters:
@@ -68,6 +50,19 @@ Another mode is validation mode -- using the `ContentFilterable.validate` extens
 
 The plugin ships with handling for all of Configurate's built-in formats, but any others can be added by creating new instances of the `ConfigProcessor` class.
 
+## [Stellardrift Repository](https://plugins.gradle.org/plugin/ca.stellardrift.repository)
+
+*(since v6.0.0)* Adds extensions to the Settings and Project `RepositoryHandler`s to easily declare Stellardrift repositories on projects.
+
+These are:
+
+```gradle
+repositories {
+  stellardrift.releases() // published and proxied releases
+  stellardrift.ownReleases() // published releases
+  stellardrift.snapshots() // published and proxied snapshots
+}
+```
 
 ## [Polyglot Version Catalog](https://plugins.gradle.org/plugin/ca.stellardrift.polyglot-version-catalogs)
 
@@ -83,7 +78,7 @@ Apply it in the `settings.gradle[.kts]`, and create a `gradle/libs.versions.{yam
 **settings.gradle.kts**
 ```kotlin
 plugins {
-    id("ca.stellardrift.polyglot-version-catalogs") version "5.0.0"
+    id("ca.stellardrift.polyglot-version-catalogs") version "6.0.0"
 }
 
 // [...]
@@ -94,16 +89,14 @@ plugins {
 # Basic format metadata
 metadata:
   format: {version: 1.0}
-  # Enable features added by this plugin
-  polyglot-extensions: [plugins]
   
 # Declare versions for project plugins
 # This *does not* work for `settings` plugins.
 # Declarations here do not actually apply any plugins -- they simply provide default versions.
 plugins:
-  org.cadixdev.licenser: 0.5.1
-  com.github.ben-manes.versions: 0.38.0
-  com.github.johnrengelman.shadow: 6.1.0
+  indra-licenserSpotless: {id: net.kyori.indra.licenser.spotless, version: 3.0.0}
+  versions: "com.github.ben-manes.versions:0.38.0"
+  shadow: "com.github.johnrengelman.shadow:6.1.0"
 
 # Gradle-style version references
 versions:
