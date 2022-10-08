@@ -228,7 +228,6 @@ final class VersionCatalogApplier {
                     this.builder.plugin(alias, split[0]).version(split[1]);
                 }
             }
-            this.plugins.id(String.valueOf(entry.getKey())).version(entry.getValue().get(String.class));
         }
     }
 
