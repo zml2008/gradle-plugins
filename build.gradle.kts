@@ -2,12 +2,10 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    kotlin("jvm") version "1.7.20" apply false // we must override what we're providing ourself... whoo circular dependencies
-
-    val indraVersion = "3.0.0"
-    id("net.kyori.indra") version indraVersion apply false
-    id("net.kyori.indra.licenser.spotless") version indraVersion apply false
-    id("net.kyori.indra.publishing.gradle-plugin") version indraVersion apply false
+    alias(libs.plugins.kotlin) apply false
+    alias(libs.plugins.indra) apply false
+    alias(libs.plugins.indra.licenserSpotless) apply false
+    alias(libs.plugins.indra.gradlePlugin) apply false
 }
 
 group = "ca.stellardrift"
@@ -35,14 +33,13 @@ subprojects {
     }
 
     dependencies {
-        val junitVersion: String by project
         "implementation"(gradleKotlinDsl())
 
         "testImplementation"(kotlin("test"))
         "testImplementation"(kotlin("test-junit5"))
-        "testImplementation"("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-        "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
-        "implementation"("net.kyori:mammoth:1.3.0-SNAPSHOT")
+        "testImplementation"(rootProject.libs.junit.api)
+        "testRuntimeOnly"(rootProject.libs.junit.engine)
+        "implementation"(rootProject.libs.mammoth)
     }
 
     extensions.configure(net.kyori.indra.licenser.spotless.IndraSpotlessLicenserExtension::class) {
@@ -54,6 +51,7 @@ subprojects {
         fun com.diffplug.gradle.spotless.FormatExtension.commonOptions() {
             endWithNewline()
             trimTrailingWhitespace()
+            indentWithSpaces(4)
         }
         java {
             commonOptions()
@@ -61,16 +59,17 @@ subprojects {
             importOrder("", "\\#")
         }
 
+        val ktlintOptions = mapOf("ij_kotlin_imports_layout" to "*")
         kotlin {
             commonOptions()
-            ktlint("0.47.1")
-                .editorConfigOverride(mapOf("ij_kotlin_imports_layout" to "*"))
+            ktlint(libs.versions.ktlint.get())
+                .editorConfigOverride(ktlintOptions)
         }
 
         kotlinGradle {
             commonOptions()
-            ktlint("0.47.1")
-                .editorConfigOverride(mapOf("ij_kotlin_imports_layout" to "*"))
+            ktlint(libs.versions.ktlint.get())
+                .editorConfigOverride(ktlintOptions)
         }
     }
 

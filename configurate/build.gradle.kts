@@ -1,25 +1,24 @@
 plugins {
     groovy
-    id("com.diffplug.eclipse.apt") version "3.35.0"
+    alias(libs.plugins.eclipseApt)
 }
 
-val configurateVersion = "4.1.2"
 dependencies {
     implementation(localGroovy())
 
-    compileOnlyApi("org.immutables:value:2.9.2:annotations")
-    compileOnlyApi("org.immutables:builder:2.9.2")
-    annotationProcessor("org.immutables:value:2.9.2")
+    compileOnlyApi(variantOf(libs.immutables.value) { classifier("annotations") })
+    compileOnlyApi(libs.immutables.builder)
+    annotationProcessor(libs.immutables.value)
 
-    api(platform("org.spongepowered:configurate-bom:$configurateVersion"))
-    api("org.spongepowered:configurate-extra-kotlin")
-    api("org.spongepowered:configurate-hocon")
-    api("org.spongepowered:configurate-yaml")
-    api("org.spongepowered:configurate-gson") {
+    api(platform(libs.configurate.bom))
+    api(libs.configurate.extraKotlin)
+    api(libs.configurate.hocon)
+    api(libs.configurate.yaml)
+    api(libs.configurate.gson) {
         exclude(group = "com.google.code.gson", module = "gson")
     }
-    implementation("com.google.code.gson:gson:2.9.1")
-    api("org.spongepowered:configurate-xml")
+    implementation(libs.gson)
+    api(libs.configurate.xml)
 }
 
 indraPluginPublishing {
@@ -49,7 +48,7 @@ tasks {
     javadoc {
         (options as? StandardJavadocDocletOptions)?.apply {
             links(
-                "https://configurate.aoeu.xyz/$configurateVersion/apidocs/"
+                "https://configurate.aoeu.xyz/${libs.versions.configurate.get()}/apidocs/"
             )
         }
     }

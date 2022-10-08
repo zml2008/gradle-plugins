@@ -1,6 +1,6 @@
 dependencies {
-    api("net.kyori:indra-common:3.0.0")
-    api("net.kyori:indra-licenser-spotless:3.0.0")
+    api(libs.indra.common)
+    api(libs.indra.licenserSpotless)
     api(project(":gradle-plugin-stellardrift-repository"))
 }
 
