@@ -10,7 +10,7 @@ indra = "3.0.0"
 junit = "5.9.1"
 kotlin = "1.7.20"
 ktlint = "0.47.1"
-mammoth = "1.3.0-SNAPSHOT"
+mammoth = "1.3.0"
 spotless = "6.11.0"
 
 [libraries]
