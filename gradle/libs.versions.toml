@@ -36,7 +36,7 @@ immutables-builder = { module = "org.immutables:builder", version.ref = "immutab
 
 # for renovate -- do not use directly
 
-zKtlint = { module = "com.pintrest.ktlint:ktlint-core", version.ref = "ktlint" }
+zKtlint = { module = "com.pinterest.ktlint:ktlint-core", version.ref = "ktlint" }
 
 [plugins]
 indra = { id = "net.kyori.indra", version.ref = "indra"}
