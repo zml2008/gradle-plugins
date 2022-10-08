@@ -63,6 +63,7 @@ final class VersionCatalogApplier {
      * @param node node to load
      * @throws SerializationException if information is provided in an invalid format
      */
+    @SuppressWarnings("deprecation")
     public void load(final ConfigurationNode node) throws SerializationException {
         final ConfigurationNode metadata = node.node(METADATA);
         if (!metadata.empty()) {

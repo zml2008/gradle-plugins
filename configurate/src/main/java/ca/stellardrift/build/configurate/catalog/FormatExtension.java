@@ -28,5 +28,6 @@ public enum FormatExtension {
      *
      * @deprecated since 6.0.0, now that Gradle officially supports plugin specification
      */
+    @Deprecated
     PLUGINS
 }
