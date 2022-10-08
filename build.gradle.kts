@@ -50,7 +50,7 @@ subprojects {
     }
 
     extensions.configure(SpotlessExtension::class) {
-        ratchetFrom("origin/dev")
+        ratchetFrom("origin/trunk")
         fun com.diffplug.gradle.spotless.FormatExtension.commonOptions() {
             endWithNewline()
             trimTrailingWhitespace()
