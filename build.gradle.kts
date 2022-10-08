@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "ca.stellardrift"
-version = "6.0.0-SNAPSHOT"
+version = "6.0.0"
 description = "A suite of plugins to apply defaults preferred for Stellardrift projects"
 
 subprojects {
