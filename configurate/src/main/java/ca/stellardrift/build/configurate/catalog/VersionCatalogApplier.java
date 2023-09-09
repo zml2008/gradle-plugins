@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 zml
+ * Copyright 2020-2023 zml
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package ca.stellardrift.build.configurate.catalog;
 
-import ca.stellardrift.build.configurate.GradleVersionUtil;
 import io.leangen.geantyref.TypeFactory;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -167,20 +166,12 @@ final class VersionCatalogApplier {
 
     @SuppressWarnings("deprecation")
     private void library(final String alias, final String gav) {
-        if (GradleVersionUtil.VERSION_CATALOGS_STABLE) {
-            this.builder.library(alias, gav);
-        } else {
-            this.builder.alias(alias).to(gav);
-        }
+        this.builder.library(alias, gav);
     }
 
     @SuppressWarnings("deprecation")
     private VersionCatalogBuilder.LibraryAliasBuilder library(final String alias, final String group, final String name) {
-        if (GradleVersionUtil.VERSION_CATALOGS_STABLE) {
-            return this.builder.library(alias, group, name);
-        } else {
-            return this.builder.alias(alias).to(group, name);
-        }
+        return this.builder.library(alias, group, name);
     }
 
     private void bundles(final ConfigurationNode bundles) throws SerializationException {

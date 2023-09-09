@@ -11,6 +11,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories { pluginManagement.repositories.forEach { add(it) } }
@@ -21,7 +25,6 @@ rootProject.name = "gradle-plugins"
 listOf(
     "opinionated-common",
     "localization",
-    "templating",
     "configurate",
     "stellardrift-repository"
 ).forEach {

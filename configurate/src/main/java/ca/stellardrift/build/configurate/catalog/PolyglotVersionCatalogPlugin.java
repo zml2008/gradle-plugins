@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 zml
+ * Copyright 2020-2023 zml
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@ package ca.stellardrift.build.configurate.catalog;
 import ca.stellardrift.build.configurate.ConfigFormats;
 import ca.stellardrift.build.configurate.ConfigProcessor;
 import ca.stellardrift.build.configurate.GradleVersionUtil;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
+import org.gradle.util.GradleVersion;
 
 public class PolyglotVersionCatalogPlugin implements Plugin<Settings> {
 
@@ -43,13 +44,12 @@ public class PolyglotVersionCatalogPlugin implements Plugin<Settings> {
 
     @Override
     public void apply(final Settings target) {
-
         final PolyglotVersionCatalogExtension deps = target.getExtensions()
                 .create("deps", PolyglotVersionCatalogExtension.class, target);
 
         if (!GradleVersionUtil.VERSION_CATALOGS_STABLE) {
-            // enable version catalogs on versions where it's a feature preview - we assume this is wanted when applying a plugin based around the feature
-            target.enableFeaturePreview("VERSION_CATALOGS");
+            throw new GradleException("The polyglot version catalog plugin no longer supports incubating versions of version catalogs.\n" +
+                "Please use Gradle 7.4 or newer (you currently have " + GradleVersion.current() + ")");
         }
 
         // Register a listener to register the dependencies for the first available format found, after evaluating the Settings

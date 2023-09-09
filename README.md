@@ -36,9 +36,15 @@ Property | Type | Use
 
 ## [Templating](https://plugins.gradle.org/plugin/ca.stellardrift.templating) 
 
+This plugin is no longer published as of version 6.1.0. It has been replaced by 
+the [blossom](https://github.com/KyoriPowered/blossom) plugin instead, which provides many more powerful and flexible features.
+
+<details>
+<summary>Legacy plugin information</summary>
 Given GString templates in `src/<set>/templates`, source will be generated into a generated source root. 
 
 Tasks are named `generate[SourceSet]Templates`, and extend Copy for easy customization. Template properties may be provided using the `GenerateTemplateTask.properties()` method. If no properties are provided, the template context will contain one property, `project` set to the project object.
+</details>
 
 ## [Configurate Transformations](https://plugins.gradle.org/plugin/ca.stellardrift.configurate-transformations)
 

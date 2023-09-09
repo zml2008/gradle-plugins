@@ -25,7 +25,7 @@ subprojects {
         target {
             compilations.configureEach {
                 kotlinOptions {
-                    languageVersion = "1.3"
+                    languageVersion = "1.4"
                     freeCompilerArgs = freeCompilerArgs + listOf("-Xjvm-default=all")
                 }
             }
@@ -37,8 +37,10 @@ subprojects {
 
         "testImplementation"(kotlin("test"))
         "testImplementation"(kotlin("test-junit5"))
+        "testImplementation"(platform(rootProject.libs.junit.bom))
         "testImplementation"(rootProject.libs.junit.api)
         "testRuntimeOnly"(rootProject.libs.junit.engine)
+        "testRuntimeOnly"(rootProject.libs.junit.launcher)
         "implementation"(rootProject.libs.mammoth)
     }
 
