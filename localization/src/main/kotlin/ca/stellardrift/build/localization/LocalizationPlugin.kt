@@ -55,8 +55,6 @@ open class LocalizationExtension @Inject constructor(objects: ObjectFactory) {
 }
 
 abstract class LocalizationGenerate : DefaultTask() {
-    private val templateEngine = StreamingTemplateEngine()
-
     @get:Inject
     abstract val objectFactory: ObjectFactory
 
@@ -84,7 +82,7 @@ abstract class LocalizationGenerate : DefaultTask() {
 
     @TaskAction
     fun generateSources() {
-        val template = templateEngine.createTemplate(templateFile.get().asFile)
+        val template = StreamingTemplateEngine().createTemplate(templateFile.get().asFile)
         tree.visit {
             if (it.isDirectory) {
                 return@visit
