@@ -6,12 +6,11 @@ configurate = "4.1.2"
 goomph = "3.42.2"
 gson = "2.10.1"
 immutables = "2.9.3"
-indra = "3.1.2"
-junit = "5.10.0"
-kotlin = "1.9.10"
+indra = "3.1.3"
+junit = "5.11.4"
 ktlint = "0.49.1"
 mammoth = "1.3.1"
-spotless = "6.21.0"
+spotless = "6.25.0"
 
 [libraries]
 
@@ -44,6 +43,5 @@ zKtlint = { module = "com.pinterest.ktlint:ktlint-core", version.ref = "ktlint" 
 indra = { id = "net.kyori.indra", version.ref = "indra"}
 indra-gradlePlugin = { id = "net.kyori.indra.publishing.gradle-plugin", version.ref = "indra" }
 indra-licenserSpotless = { id = "net.kyori.indra.licenser.spotless", version.ref = "indra" }
-kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless"}
 eclipseApt = { id = "com.diffplug.eclipse.apt", version.ref = "goomph"}

@@ -104,8 +104,8 @@ class OpinionatedDefaultsPlugin : Plugin<Project> {
                         it.manifest.attributes(
                             mapOf(
                                 "Automatic-Module-Name"
-                                    to "$group.${name.replace("-", ".").toLowerCase(Locale.ROOT)}"
-                            )
+                                    to "$group.${name.replace("-", ".").lowercase(Locale.ROOT)}",
+                            ),
                         )
                     }
                 }

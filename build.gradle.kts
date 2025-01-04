@@ -1,15 +1,16 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    alias(libs.plugins.kotlin) apply false
+    embeddedKotlin("jvm") apply false
     alias(libs.plugins.indra) apply false
     alias(libs.plugins.indra.licenserSpotless) apply false
     alias(libs.plugins.indra.gradlePlugin) apply false
 }
 
 group = "ca.stellardrift"
-version = "6.1.1-SNAPSHOT"
+version = "6.2.0-SNAPSHOT"
 description = "A suite of plugins to apply defaults preferred for Stellardrift projects"
 
 subprojects {
@@ -20,15 +21,22 @@ subprojects {
     apply(plugin="net.kyori.indra.publishing.gradle-plugin")
     apply(plugin="org.jetbrains.kotlin.jvm")
 
-    extensions.configure(KotlinJvmProjectExtension::class) {
-        coreLibrariesVersion = "1.5.31"
-        target {
-            compilations.configureEach {
-                kotlinOptions {
-                    languageVersion = "1.4"
-                    freeCompilerArgs = freeCompilerArgs + listOf("-Xjvm-default=all")
-                }
+    configurations.configureEach {
+        if (isCanBeConsumed) {
+            val usage = attributes.getAttribute(Usage.USAGE_ATTRIBUTE) ?: return@configureEach
+            if (usage.name in setOf(Usage.JAVA_RUNTIME, Usage.JAVA_API)) {
+                attributes.attribute(
+                    GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
+                    objects.named(GradleVersion.current().version)
+                )
             }
+        }
+    }
+
+    extensions.configure(KotlinJvmProjectExtension::class) {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_17
+            freeCompilerArgs.addAll(listOf("-Xjvm-default=all", "-Xjdk-release=17"))
         }
     }
 
@@ -80,6 +88,7 @@ subprojects {
             ci(true)
         }
         apache2License()
+        javaVersions().target(17)
 
         configurePublications {
             pom {
