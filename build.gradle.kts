@@ -7,10 +7,11 @@ plugins {
     alias(libs.plugins.indra) apply false
     alias(libs.plugins.indra.licenserSpotless) apply false
     alias(libs.plugins.indra.gradlePlugin) apply false
+    id("com.gradle.plugin-publish") version "1.3.1" apply false
 }
 
 group = "ca.stellardrift"
-version = "6.2.0"
+version = "6.2.1-SNAPSHOT"
 description = "A suite of plugins to apply defaults preferred for Stellardrift projects"
 
 subprojects {
