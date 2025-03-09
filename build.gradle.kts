@@ -101,8 +101,8 @@ subprojects {
             }
         }
 
-        publishReleasesTo("stellardrift", "https://repo.stellardrift.ca/repository/releases/")
-        publishSnapshotsTo("stellardrift", "https://repo.stellardrift.ca/repository/snapshots/")
+        publishReleasesTo("stellardrift", "https://repo.stellardrift.ca/maven/releases/")
+        publishSnapshotsTo("stellardrift", "https://repo.stellardrift.ca/maven/snapshots/")
     }
 
     extensions.configure(net.kyori.indra.gradle.IndraPluginPublishingExtension::class) {

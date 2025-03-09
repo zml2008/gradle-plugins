@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 zml
+ * Copyright 2022-2025 zml
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor;
 
 class StellardriftRepositoryExtensionImpl implements StellardriftRepositoryExtension {
-    private static final String BASE_URL = "https://repo.stellardrift.ca/repository/";
+    private static final String BASE_URL = "https://repo.stellardrift.ca/maven/";
 
     private static final String RELEASES_URL = BASE_URL + "internal/";
     private static final String OWN_RELEASES_URL = BASE_URL + "releases/";
